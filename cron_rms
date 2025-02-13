@@ -1,0 +1,2 @@
+#*/30 * * * *   root systemctl restart rmsclient.service
+0 8 * * * root /user/local/bin/ota_rms_program

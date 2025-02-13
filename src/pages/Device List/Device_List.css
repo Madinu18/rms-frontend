@@ -1,0 +1,173 @@
+/* Reset dasar */
+/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+} */
+
+/* Navbar styling */
+.navbar {
+    /* background-color: #0073e6;
+    padding: 10px;
+    color: white; */
+    position: sticky;  /* Membuat navbar tetap di atas saat scroll */
+    top: 0;  /* Posisi tetap di atas */
+    z-index: 1000;  /* Memastikan navbar berada di atas elemen lain */
+    width: 100%;
+}
+
+/* Sidebar styling */
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f4f4;
+    transition: transform 0.3s ease;
+    width: 250px;
+    height: 100vh;
+    position: fixed; /* Tetap pada sisi kiri layar */
+    top: 1;
+    left: 0;
+    box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.sidebar-container.hidden {
+    transform: translateX(-100%);
+}
+
+.sidebar-container .toggle-button {
+    border-radius: 0px 8px 8px 0px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -35px;
+    background-color: #bfc1c3;
+    border: none;
+    color: white;
+    width: 35px;
+    height: 50px;
+    cursor: pointer;
+    opacity: 0.5; /* Mulai dengan opacity rendah */
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    font-size: 20px; /* Ukuran teks lebih besar */
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+.sidebar-container .toggle-button:hover {
+    opacity: 1; /* Opacity penuh saat cursor ada di atas tombol */
+    background-color: #bfc1c3; /* Sedikit gelap untuk efek hover */
+}
+
+.sidebar-container .toggle-button:hover {
+    background-color: #bfc1c3;
+}
+
+/* Konten utama */
+.content {
+    margin-left: 250px; /* Ruang untuk sidebar */
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+    background-color: #ffffff; /* Tambahkan latar belakang */
+    min-height: 100vh;
+    /* top: 1; */
+}
+
+.content.full-width {
+    margin-left: 0;
+}
+
+/* Tambahkan margin di bawah elemen konten */
+.content > * {
+    margin-bottom: 20px;
+    padding: 5px;
+}
+
+.dashboard-content {
+    display: flex;
+    /* gap: 20px; */
+}
+
+.dashboard-left {
+    flex: 0 0 20%; /* Sisi kiri 20% */
+    margin-right: 10px;
+}
+
+.dashboard-right {
+    flex: 0 0 80%; /* Sisi kanan 80% */
+}
+
+.chart-container {
+    display: flex; /* Menampilkan chart bersebelahan */
+    justify-content: space-between; /* Jarak antar chart */
+    gap: 20px; /* Menambahkan jarak antar chart */
+    padding: 10px;
+}
+
+.chart {
+    flex: 1; /* Membuat setiap chart memiliki lebar 48% dari container */
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+    .content {
+        margin-left: 0;
+    }
+
+    .sidebar-container {
+        width: 200px;
+    }
+}
+
+.datePicker {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+    width: 250px; /* Increase the width */
+}
+
+.datePicker input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+}
+
+.datePicker input::placeholder {
+    color: #999;
+}
+
+.datePicker:hover {
+    border-color: #0073e6;
+}
+
+.datePicker:focus-within {
+    border-color: #0073e6;
+}
+
+.datePicker .react-datepicker__close-icon::after {
+    background-color: #0344f9; /* Brighter blue color */
+    color: white;
+    border-radius: 50%;
+    padding: 2px;
+}
+
+.datePicker .react-datepicker__day--in-range,
+.datePicker .react-datepicker__day--in-selecting-range {
+    background-color: #00aaff; /* Brighter blue color */
+    color: white;
+}
+
+.datePicker .react-datepicker__day--selecting-range-start,
+.datePicker .react-datepicker__day--selecting-range-end {
+    background-color: #00aaff; /* Brighter blue color */
+    color: white;
+}

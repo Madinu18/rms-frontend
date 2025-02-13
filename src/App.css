@@ -1,0 +1,29 @@
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  overflow-y: auto;
+  transition: margin-left 0.3s ease;
+  margin-left: 250px;
+  /* Sama dengan lebar sidebar */
+}
+
+.content.expanded {
+  margin-left: 0;
+}

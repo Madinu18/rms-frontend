@@ -1,0 +1,144 @@
+.dashboard-content {
+    display: flex;
+    gap: 40px; /* Mengurangi jarak antar container */
+    margin-top: 10px;
+    justify-content: center; /* Menempatkan container di tengah */
+}
+
+.dashboard-left, .dashboard-center, .dashboard-right {
+    flex: 1; /* Membuat ketiga container memiliki ukuran yang sama */
+    max-width: 20%; /* Membatasi lebar maksimal masing-masing container */
+    height: 150px; /* Menetapkan tinggi masing-masing container */
+}
+
+.charts-container {
+    display: flex; /* Menampilkan chart bersebelahan */
+    justify-content: space-between; 
+    justify-content: space-evenly;
+    gap: 20px; /* Menambahkan jarak antar chart */
+    padding: 10px;
+}
+
+.chart-title{
+    margin: 0;
+    text-align: center;
+}
+
+.chart {
+    flex: 1; /* Membuat setiap chart memiliki lebar 48% dari container */
+}
+
+.key-value-pairs {
+    display: flex;
+    align-items: center; /* Menyelaraskan elemen secara vertikal */
+    justify-content: center; /* Menempatkan elemen di tengah secara horizontal */
+    gap: 16px; /* Jarak antar elemen */
+}
+
+.pair-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer; /* Memberikan tanda klik */
+    transition: transform 0.2s; /* Animasi kecil ketika hover */
+}
+
+.pair-item:hover {
+    transform: scale(1.05); /* Membesarkan elemen sedikit saat hover */
+}
+
+.label {
+    font-size: 1rem; /* Ukuran teks label */
+    color: #666; /* Warna teks label */
+    padding-bottom: 15px;
+}
+
+.value {
+    font-size: 2rem; /* Ukuran angka besar */
+    font-weight: bold; /* Menonjolkan angka */
+    color: #333; /* Warna angka */
+    
+}
+
+.divider {
+    font-size: 4rem; /* Ukuran garis vertikal */
+    color: #ccc; /* Warna garis */
+}
+
+.detail-button {
+    display: inline-block;
+    margin-top: 20px; /* Jarak dengan elemen di atasnya */
+    padding: 5px 10px; /* Memperkecil padding di dalam tombol */
+    background-color: #007bff; /* Warna biru */
+    color: #fff; /* Warna teks putih */
+    text-align: center; /* Teks di tengah */
+    text-decoration: none; /* Menghapus garis bawah */
+    font-size: 0.875rem; /* Ukuran teks lebih kecil */
+    border-radius: 3px; /* Sudut tombol lebih kecil */
+    cursor: pointer; /* Menampilkan kursor klik */
+    transition: background-color 0.2s; /* Efek transisi warna */
+}
+
+.detail-button:hover {
+    background-color: #0056b3; /* Warna biru lebih gelap saat hover */
+}
+
+.online-count, .offline-count, .total-count {
+    margin-top: 20px; /* Menambahkan jarak antara header dan teks */
+    font-size: 4em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.online-count {
+    color: green;
+}
+
+.offline-count {
+    color: red;
+}
+
+.total-count {
+    color: orange;
+}
+
+.terminal-image {
+    width: 25px; /* Atur ukuran gambar sesuai kebutuhan */
+    height: auto;
+    filter: grayscale(100%); /* Warna abu-abu */
+    opacity: 0.3;
+    transition: filter 0.3s ease; /* Animasi transisi */
+  }
+  
+.terminal-image:hover {    
+    opacity: 0.9;
+}
+
+.internet-image {
+    width: 25px; /* Atur ukuran gambar sesuai kebutuhan */
+    height: auto;
+    filter: grayscale(100%); /* Warna abu-abu */
+    opacity: 0.3;
+    transition: filter 0.3s ease; /* Animasi transisi */
+  }
+  
+.internet-image:hover {    
+    opacity: 0.9;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+    .content {
+        margin-left: 0;
+    }
+
+    .sidebar-container {
+        width: 200px;
+    }
+}

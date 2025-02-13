@@ -1,0 +1,11 @@
+.page-container {
+    margin-top: 100px;
+    padding: 20px;
+    overflow: auto;
+    flex-direction: column;
+    /* Add padding to allow scrolling */
+    -ms-overflow-style: scrollbar;
+    /* For Internet Explorer and Edge */
+    scrollbar-width: thin;
+    /* For Firefox */
+}
