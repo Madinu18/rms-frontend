@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Button, Container, FormField, Header, Input, Modal, SpaceBetween, Table, TextFilter, ProgressBar } from '@cloudscape-design/components';
 import { Terminal } from 'xterm';
@@ -20,7 +23,6 @@ import downloadIcon from '../../assets/download.png'; // Import download icon
 // import { useState, useMemo, useCallback } from "react";
 // import { Link } from "react-router-dom";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Dashboard: React.FC<{}> = () => {
     const name = localStorage.getItem('name') || '';
     const role = localStorage.getItem('role_name') || '';
@@ -30,6 +32,10 @@ const Dashboard: React.FC<{}> = () => {
 
     const id_user = localStorage.getItem('id_user') || '';
     const id_role = localStorage.getItem('id_role') || '';
+
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [errorId, setErrorId] = useState('');
 
     const [dataDevice, setDataDevice] = useState<any[]>([]);
     const [onlineDevices, setOnlineDevices] = useState(0);
@@ -50,6 +56,12 @@ const Dashboard: React.FC<{}> = () => {
     const [showSftpLoginModal, setShowSftpLoginModal] = useState(false);
 
     const [showSftpModal, setShowSftpModal] = useState(false);
+
+    const [isLoadingNewFolder, setLoadingNewFolder] = useState(false);
+    const [isLoadingDeleteFolder, setLoadingDeleteFolder] = useState(false);
+    const [isLoadingDeleteFile, setLoadingDeleteFile] = useState(false);
+    const [isLoadingChangeName, setLoadingChangeName] = useState(false);
+    const [isLoadingUploadFile, setLoadingUploadFile] = useState(false);
 
     const [loginData, setLoginData] = useState({
         username: '',
@@ -100,8 +112,17 @@ const Dashboard: React.FC<{}> = () => {
             },
             body: JSON.stringify({ datetime, devicename, serialnumber }),
         })
-            .then(response => response.json())
-            .then(async data => {
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    // Handle HTTP error responses
+                    setErrorId(data.id || '');
+                    setErrorMessage(data.error || `Failed to create SFTP conenction`);
+                    setShowErrorModal(true);
+                    setSftpLoading(false);
+                    return;
+                }
+
                 console.log('Success:', data);
 
                 // const output = data.output;
@@ -132,11 +153,18 @@ const Dashboard: React.FC<{}> = () => {
 
                 } else {
                     console.log('Port tidak ditemukan');
+                    setSftpLoading(false);
+                    setErrorId('');
+                    setErrorMessage("Cannot find SFTP port");
+                    setShowErrorModal(true);
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
                 setSftpLoading(false);
+                setErrorId('');
+                setErrorMessage("Failed to create SFTP conenction");
+                setShowErrorModal(true);
             });
 
 
@@ -223,8 +251,18 @@ const Dashboard: React.FC<{}> = () => {
             },
             body: JSON_MESSAGE,
         })
-            .then(response => response.json())
-            .then(data => {
+            .then(async response => {
+                const data = await response.json()
+
+                if (!response.ok) {
+                    // Handle HTTP error responses
+                    setErrorId(data.id || '');
+                    setErrorMessage(data.error || `Failed to fetch folder data`);
+                    setShowErrorModal(true);
+                    setLoadingFolder(false);
+                    return;
+                }
+
                 console.log('Success:', data);
                 // console.log(data.data);
                 if (Array.isArray(data.data)) {
@@ -232,6 +270,10 @@ const Dashboard: React.FC<{}> = () => {
                     setLoadingFolder(false);
                 } else {
                     console.error('Error: data is not an array');
+                    setErrorId(data.id || '');
+                    setErrorMessage(data.error || `Unexpected error happend while fetching folder data`);
+                    setShowErrorModal(true);
+                    setLoadingFolder(false);
                 }
             })
             .catch((error) => {
@@ -262,6 +304,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const handleUploadSubmit = async () => {
         if (!selectedFile) return;
+        setLoadingUploadFile(true);
 
         const formData = new FormData();
         formData.append('file', selectedFile);
@@ -289,6 +332,7 @@ const Dashboard: React.FC<{}> = () => {
                 if (xhr.status === 200) {
                     console.log('File uploaded successfully');
                     setShowUploadModal(false);
+                    setLoadingUploadFile(false);
                     setSelectedFile(null);
                     setUploadProgress(0);
                     await fetchSftpData(JSON.stringify({
@@ -298,17 +342,32 @@ const Dashboard: React.FC<{}> = () => {
                         directory: showDirectory
                     }));
                 } else {
+                    setShowUploadModal(false);
+                    setLoadingUploadFile(false);
                     console.error('Failed to upload file');
+                    setErrorId('');
+                    setErrorMessage(`Failed to upload file`);
+                    setShowErrorModal(true);
                 }
             };
 
             xhr.onerror = () => {
+                setShowUploadModal(false);
+                setLoadingUploadFile(false);
                 console.error('Error uploading file');
+                setErrorId('');
+                setErrorMessage(`Failed to upload file`);
+                setShowErrorModal(true);
             };
 
             xhr.send(formData);
         } catch (error) {
             console.error('Error uploading file:', error);
+            setShowUploadModal(false);
+            setLoadingUploadFile(false);
+            setErrorId('');
+            setErrorMessage(`Failed to upload file`);
+            setShowErrorModal(true);
         }
     };
 
@@ -337,7 +396,7 @@ const Dashboard: React.FC<{}> = () => {
     const handleFolderBack = async () => {
         if (loadingFolder) return; // Prevent multiple clicks while loading
         // setLoadingFolder(true); // Set loading state to true
-        const currentDirectory = showDirectory.split('/').slice(0, -1).join('/');
+        const currentDirectory = showDirectory.split('/').slice(0, -1).join('/') || '/';
         console.log('Current directory:', currentDirectory);
 
         const JSON_MESSAGE = JSON.stringify({
@@ -404,12 +463,19 @@ const Dashboard: React.FC<{}> = () => {
                 link.click();
             } else {
                 console.error('Failed to download file');
+                const data = await response.json();
+                setErrorId(data.id || '');
+                setErrorMessage(data.error || 'Unknown error occurred while downloading file');
+                setShowErrorModal(true);
             }
         } catch (error) {
             if (controller.signal.aborted) {
                 console.log('Download canceled');
             } else {
                 console.error('Error downloading file:', error);
+                setErrorId('');
+                setErrorMessage('An unexpected error occurred while downloading file');
+                setShowErrorModal(true);
             }
         } finally {
             setIsDownloading(false);
@@ -419,6 +485,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const handleNewFolderSubmit = async () => {
         console.log('New folder name:', newFolderName);
+        setLoadingNewFolder(true);
 
         const JSON_MESSAGE = JSON.stringify({
             username: loginData.username,
@@ -445,17 +512,30 @@ const Dashboard: React.FC<{}> = () => {
             if (response.ok) {
                 await fetchSftpData(JSON_MESSAGE);
                 setNewFolderName('');
+                setLoadingNewFolder(false);
                 setShowNewFolderModal(false);
             } else {
+                setLoadingNewFolder(false);
+                setShowNewFolderModal(false);
+                const data = await response.json();
                 console.error('Failed create file');
+                setErrorId(data.id || '');
+                setErrorMessage(data.error || `Failed to create file`);
+                setShowErrorModal(true);
             }
         } catch (error) {
+            setLoadingNewFolder(false);
+            setShowNewFolderModal(false);
             console.log('Error:', error);
+            setErrorId('');
+            setErrorMessage(`Failed to create file`);
+            setShowErrorModal(true);
         }
     };
 
     const handleDeleteForderSubmit = async () => {
         console.log('Delete folder name:', deleteFolderName);
+        setLoadingDeleteFolder(true);
 
         const deleteDirectory = `${showDirectory}/${deleteFolderName}`;
         console.log('Current directory:', deleteDirectory);
@@ -485,14 +565,20 @@ const Dashboard: React.FC<{}> = () => {
             });
             if (response.ok) {
                 await fetchSftpData(JSON_MESSAGE_FOR_FETCH);
+                setLoadingDeleteFolder(false);
                 setShowDeleteFolderModal(false);
             } else {
-                console.error('Failed create file');
+                setLoadingDeleteFolder(false);
+                setShowDeleteFolderModal(false);
+                const data = await response.json();
+                console.error('Failed delete folder');
+                setErrorId(data.id || 'HTTP_ERROR');
+                setErrorMessage(data.error || `Failed to delete folder`);
+                setShowErrorModal(true);
             }
         } catch (error) {
             console.log('Error:', error);
         }
-
     };
 
     const [showDeleteFileModal, setShowDeleteFileModal] = useState(false); // Add state for delete file modal
@@ -500,6 +586,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const handleDeleteFileSubmit = async () => {
         console.log('Delete file name:', deleteFileName);
+        setLoadingDeleteFile(true);
 
         const JSON_MESSAGE = JSON.stringify({
             username: loginData.username,
@@ -520,16 +607,29 @@ const Dashboard: React.FC<{}> = () => {
             });
             if (response.ok) {
                 await fetchSftpData(JSON_MESSAGE);
+                setLoadingDeleteFile(false);
                 setShowDeleteFileModal(false);
             } else {
+                setLoadingDeleteFile(false);
+                setShowDeleteFileModal(false);
+                const data = await response.json();
                 console.error('Failed to delete file');
+                setErrorId(data.id || '');
+                setErrorMessage(data.error || `Failed to delete file`);
+                setShowErrorModal(true);
             }
         } catch (error) {
+            setLoadingDeleteFile(false);
+            setShowDeleteFileModal(false);
             console.log('Error:', error);
+            setErrorId('');
+            setErrorMessage(`Failed to delete file`);
+            setShowErrorModal(true);
         }
     };
 
     const handleChangeFileName = async (oldFileName: string, newFileName: string) => {
+        setLoadingChangeName(true);
         const JSON_MESSAGE = JSON.stringify({
             username: loginData.username,
             password: loginData.password,
@@ -551,8 +651,15 @@ const Dashboard: React.FC<{}> = () => {
             if (response.ok) {
                 await fetchSftpData(JSON_MESSAGE);
                 console.log(`File renamed from ${oldFileName} to ${newFileName} successfully`);
+                setLoadingChangeName(false);
             } else {
+                setLoadingChangeName(false);
+                setShowRenameFileModal(false);
+                const data = await response.json();
                 console.error('Failed to rename file');
+                setErrorId(data.id || '');
+                setErrorMessage(data.error || `Failed to rename file`);
+                setShowErrorModal(true);
             }
         } catch (error) {
             console.log('Error:', error);
@@ -622,8 +729,17 @@ const Dashboard: React.FC<{}> = () => {
             },
             body: JSON.stringify({ name, role, company, datetime, devicename, serialnumber }),
         })
-            .then(response => response.json())
-            .then(data => {
+            .then(async response => {
+                const data = await response.json()
+
+                if (!response.ok) {
+                    // Handle HTTP error responses
+                    setErrorId(data.id || '');
+                    setErrorMessage(data.error || `Failed to enable SSH connection`);
+                    setShowErrorModal(true);
+                    return;
+                }
+
                 console.log('Success:', data);
 
                 // const output = data.output;
@@ -635,10 +751,16 @@ const Dashboard: React.FC<{}> = () => {
                     setShowTerminal(true);
                 } else {
                     console.log('Port tidak ditemukan');
+                    setErrorId('');
+                    setErrorMessage(`Failed to enable SSH connection`);
+                    setShowErrorModal(true);
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
+                setErrorId('');
+                setErrorMessage(`Failed to enable SSH connection`);
+                setShowErrorModal(true);
             });
         // setShowTerminal(true);
     };
@@ -655,7 +777,7 @@ const Dashboard: React.FC<{}> = () => {
                 },
                 body: JSON.stringify({ datetime, devicename, serialnumber, port }),
             })
-                .then(response => response.json())
+                .then(async response => { response.json() })
                 .then(data => {
                     console.log('success:', data);
                     setShowTerminal(false);
@@ -683,8 +805,17 @@ const Dashboard: React.FC<{}> = () => {
             },
             body: JSON.stringify({ name, role, company, datetime, devicename, serialnumber }),
         })
-            .then(response => response.json())
-            .then(data => {
+            .then(async response => {
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Handle HTTP error responses
+                    setErrorId(data.id || '');
+                    setErrorMessage(data.error || `Failed to enable HTTP connection`);
+                    setShowErrorModal(true);
+                    return;
+                }
+
                 console.log('Success:', data);
 
                 // const output = data.output;
@@ -695,11 +826,17 @@ const Dashboard: React.FC<{}> = () => {
                     const newUrl = `http://157.15.164.78:${port}`;
                     setCurrentUrl(newUrl); // Update the current URL with the new port
                     console.log('url:', newUrl);
-
+                } else {
+                    setErrorId('');
+                    setErrorMessage(`Failed to enable HTTP connection`);
+                    setShowErrorModal(true);
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
+                setErrorId('');
+                setErrorMessage(`Failed to enable HTTP connection`);
+                setShowErrorModal(true);
             });
 
 
@@ -1373,18 +1510,26 @@ const Dashboard: React.FC<{}> = () => {
             )}
             <Modal
                 visible={showNewFolderModal}
-                onDismiss={() => setShowNewFolderModal(false)}
+                onDismiss={() => { if (!isLoadingNewFolder) setShowNewFolderModal(false) }}
                 header="Create New Folder"
                 closeAriaLabel="Close modal"
                 footer={
                     <>
                         <Box float="right">
-                            <Button variant="primary" onClick={() => setShowNewFolderModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={handleNewFolderSubmit}>
-                                OK
-                            </Button>
+                            {isLoadingNewFolder ? (
+                                <>
+                                    <CircularProgress size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="normal" onClick={() => setShowNewFolderModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={handleNewFolderSubmit}>
+                                        OK
+                                    </Button>
+                                </>
+                            )}
                         </Box>
                     </>
                 }
@@ -1400,18 +1545,26 @@ const Dashboard: React.FC<{}> = () => {
 
             <Modal
                 visible={showDeleteFolderModal}
-                onDismiss={() => setShowDeleteFolderModal(false)}
+                onDismiss={() => { if (!isLoadingDeleteFolder) setShowDeleteFolderModal(false) }}
                 header="Create New Folder"
                 closeAriaLabel="Close modal"
                 footer={
                     <>
                         <Box float="right">
-                            <Button variant="primary" onClick={() => setShowDeleteFolderModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={handleDeleteForderSubmit}>
-                                OK
-                            </Button>
+                            {isLoadingDeleteFolder ? (
+                                <>
+                                    <CircularProgress size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="primary" onClick={() => setShowDeleteFolderModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={handleDeleteForderSubmit}>
+                                        OK
+                                    </Button>
+                                </>
+                            )}
                         </Box>
                     </>
                 }
@@ -1420,18 +1573,26 @@ const Dashboard: React.FC<{}> = () => {
             </Modal>
             <Modal
                 visible={showUploadModal}
-                onDismiss={() => setShowUploadModal(false)}
+                onDismiss={() => { if (!isLoadingUploadFile) setShowUploadModal(false) }}
                 header="Upload File"
                 closeAriaLabel="Close modal"
                 footer={
                     <>
                         <Box float="right">
-                            <Button variant="primary" onClick={() => setShowUploadModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={handleUploadSubmit}>
-                                OK
-                            </Button>
+                            {isLoadingUploadFile ? (
+                                <>
+                                    <CircularProgress size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="primary" onClick={() => setShowUploadModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={handleUploadSubmit}>
+                                        OK
+                                    </Button>
+                                </>
+                            )}
                         </Box>
                     </>
                 }
@@ -1445,18 +1606,27 @@ const Dashboard: React.FC<{}> = () => {
             </Modal>
             <Modal
                 visible={showDeleteFileModal}
-                onDismiss={() => setShowDeleteFileModal(false)}
+                onDismiss={() => { if (!isLoadingDeleteFile) setShowDeleteFileModal(false) }}
                 header="Delete File"
                 closeAriaLabel="Close modal"
                 footer={
                     <>
                         <Box float="right">
-                            <Button variant="primary" onClick={() => setShowDeleteFileModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={handleDeleteFileSubmit}>
-                                OK
-                            </Button>
+                            {isLoadingDeleteFile ? (
+                                <>
+                                    <CircularProgress size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="primary" onClick={() => setShowDeleteFileModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={handleDeleteFileSubmit}>
+                                        OK
+                                    </Button>
+                                </>
+                            )}
+
                         </Box>
                     </>
                 }
@@ -1465,18 +1635,27 @@ const Dashboard: React.FC<{}> = () => {
             </Modal>
             <Modal
                 visible={showRenameFileModal}
-                onDismiss={() => setShowRenameFileModal(false)}
+                onDismiss={() => { if (!isLoadingChangeName) setShowRenameFileModal(false) }}
                 header="Rename File"
                 closeAriaLabel="Close modal"
                 footer={
                     <>
                         <Box float="right">
-                            <Button variant="primary" onClick={() => setShowRenameFileModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={handleRenameFileSubmit}>
-                                OK
-                            </Button>
+
+                            {isLoadingChangeName ? (
+                                <>
+                                    <CircularProgress size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="primary" onClick={() => setShowRenameFileModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={handleRenameFileSubmit}>
+                                        OK
+                                    </Button>
+                                </>
+                            )}
                         </Box>
                     </>
                 }
@@ -1488,6 +1667,24 @@ const Dashboard: React.FC<{}> = () => {
                         placeholder="Enter new file name"
                     />
                 </FormField>
+            </Modal>
+            <Modal
+                visible={showErrorModal}
+                onDismiss={() => setShowErrorModal(false)}
+                header="Error"
+                closeAriaLabel="Close modal"
+                footer={
+                    <>
+                        <Box float="right">
+                            <Button variant="primary" onClick={() => setShowErrorModal(false)}>
+                                OK
+                            </Button>
+                        </Box>
+                    </>
+                }
+            >
+                {errorId && <div>Error ID: {errorId}</div>}
+                <div>Error Message: {errorMessage}</div>
             </Modal>
             {/* <Modal
                 visible={isDownloading}
