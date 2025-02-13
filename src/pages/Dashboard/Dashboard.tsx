@@ -304,6 +304,17 @@ const Dashboard: React.FC<{}> = () => {
 
     const handleUploadSubmit = async () => {
         if (!selectedFile) return;
+
+        const fileExists = dataListFolder
+            .some(item => item.filename.toLowerCase() === selectedFile.name.toLowerCase());
+
+        if (fileExists) {
+            setErrorId('');
+            setErrorMessage(`File "${selectedFile.name}" already exists`);
+            setShowErrorModal(true);
+            return;
+        }
+
         setLoadingUploadFile(true);
 
         const formData = new FormData();
@@ -484,6 +495,24 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     const handleNewFolderSubmit = async () => {
+        if (!newFolderName.trim()) {
+            setErrorId('');
+            setErrorMessage('Folder name cannot be empty');
+            setShowErrorModal(true);
+            return;
+        }
+
+        const folderExists = dataListFolder
+            .filter(isDirectory)
+            .some(item => item.filename.toLowerCase() === newFolderName.toLowerCase());
+
+        if (folderExists) {
+            setErrorId('');
+            setErrorMessage(`Folder "${newFolderName}" already exists`);
+            setShowErrorModal(true);
+            return;
+        }
+
         console.log('New folder name:', newFolderName);
         setLoadingNewFolder(true);
 
@@ -629,6 +658,24 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     const handleChangeFileName = async (oldFileName: string, newFileName: string) => {
+        if (!newFileName.trim()) {
+            setErrorId('');
+            setErrorMessage('File name cannot be empty');
+            setShowErrorModal(true);
+            return;
+        }
+
+        const fileExists = dataListFolder
+            .some(item => item.filename.toLowerCase() === newFileName.toLowerCase() &&
+                item.filename.toLowerCase() !== oldFileName.toLowerCase());
+
+        if (fileExists) {
+            setErrorId('');
+            setErrorMessage(`File "${newFileName}" already exists`);
+            setShowErrorModal(true);
+            return;
+        }
+
         setLoadingChangeName(true);
         const JSON_MESSAGE = JSON.stringify({
             username: loginData.username,
