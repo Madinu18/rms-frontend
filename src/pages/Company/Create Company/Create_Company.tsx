@@ -55,7 +55,7 @@ const Create_Company: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://157.15.164.78:3001/devices', {
+            const response = await fetch('http://54.254.223.130:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ const Create_Company: React.FC = () => {
         });
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/company/create', {
+            const response = await fetch('http://54.254.223.130:3001/company/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

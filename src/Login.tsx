@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import React, { useState } from 'react';
 import './Login.css'; // Import the CSS file for styling
 import qimtronics_login from './assets/qimtronics_background.jpg';
@@ -25,7 +26,7 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
     });
 
     try {
-      const response = await fetch('http://157.15.164.78:3001/login', {
+      const response = await fetch('http://54.254.223.130:3001/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

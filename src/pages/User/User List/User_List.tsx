@@ -61,7 +61,7 @@ const User_List: React.FC<{}> = () => {
                 id_company: idCompany
             });
             console.log('JSON_MESSAGE:', JSON_MESSAGE);
-            const response = await fetch('http://157.15.164.78:3001/user', {
+            const response = await fetch('http://54.254.223.130:3001/user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ const User_List: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://157.15.164.78:3001/user/delete', {
+            const response = await fetch('http://54.254.223.130:3001/user/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ const User_List: React.FC<{}> = () => {
                 new_password: resetPasswordData.newPassword
             });
             console.log('Reset password payload:', JSON_MESSAGE);
-            const response = await fetch('http://157.15.164.78:3001/user/reset-password', {
+            const response = await fetch('http://54.254.223.130:3001/user/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

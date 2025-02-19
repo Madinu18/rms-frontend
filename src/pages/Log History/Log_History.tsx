@@ -18,7 +18,7 @@ const Log_History: React.FC<{}> = ({ }) => {
 
         const fetchData = async () => {
             try {
-                const response = await fetch('http://157.15.164.78:3001/log-history', {
+                const response = await fetch('http://54.254.223.130:3001/log-history', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

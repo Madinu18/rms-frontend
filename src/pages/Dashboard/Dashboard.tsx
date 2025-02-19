@@ -5,6 +5,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Box, Button, Container, FormField, Header, Input, Modal, SpaceBetween, Table, TextFilter, ProgressBar } from '@cloudscape-design/components';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// import mqtt, { MqttClient } from "mqtt";
 import 'xterm/css/xterm.css';
 // import { CircularProgress } from '@material-ui/core'; // Import CircularProgress from Material-UI
 import { CircularProgress } from '@mui/material'; // Updated import
@@ -23,7 +25,22 @@ import downloadIcon from '../../assets/download.png'; // Import download icon
 // import { useState, useMemo, useCallback } from "react";
 // import { Link } from "react-router-dom";
 
+// const MQTT_BROKER_URL = "mqtt://54.254.223.130:1883"; // Ganti dengan broker MQTT kamu
+
+// const MQTT_CONFIG = {
+//     hostname: '54.254.223.130',
+//     port: 1883,
+//     protocol: 'mqtt',
+//     path: '/mqtt'
+// };
+// const MQTT_TOPIC = "+/reply/#";
+
 const Dashboard: React.FC<{}> = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // const [client, setClient] = useState<MqttClient | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // const [message, setMessage] = useState<string>("");
+
     const name = localStorage.getItem('name') || '';
     const role = localStorage.getItem('role_name') || '';
     const company = localStorage.getItem('company_name') || '';
@@ -37,11 +54,51 @@ const Dashboard: React.FC<{}> = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [errorId, setErrorId] = useState('');
 
+    const [showSshDurationModal, setShowSshDurationModal] = useState(false);
+    const [sshDuration, setSshDuration] = useState('60'); // default 60 minutes
+    const [tempSshParams, setTempSshParams] = useState<{
+        datetime: string;
+        devicename: string;
+        serialnumber: string;
+    } | null>(null);
+
+    const [showHttpDurationModal, setShowHttpDurationModal] = useState(false);
+    const [httpDuration, setHttpDuration] = useState('60'); // default 60 minutes
+    const [tempHttpParams, setTempHttpParams] = useState<{
+        datetime: string;
+        devicename: string;
+        serialnumber: string;
+    } | null>(null);
+
+    const [showSftpDurationModal, setShowSftpDurationModal] = useState(false);
+    const [sftpDuration, setSftpDuration] = useState('60'); // default 60 minutes
+    const [tempSftpParams, setTempSftpParams] = useState<{
+        datetime: string;
+        devicename: string;
+        serialnumber: string;
+    } | null>(null);
+
+    const handleSshDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        setTempSshParams({ datetime, devicename, serialnumber });
+        setShowSshDurationModal(true);
+    };
+
+    const handleHttpsDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        setTempHttpParams({ datetime, devicename, serialnumber });
+        setShowHttpDurationModal(true);
+    };
+
+    const handleSftpDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        setTempSftpParams({ datetime, devicename, serialnumber });
+        setShowSftpDurationModal(true);
+    };
+
     const [dataDevice, setDataDevice] = useState<any[]>([]);
     const [onlineDevices, setOnlineDevices] = useState(0);
     const [offlineDevices, setOfflineDevices] = useState(0);
     const [totalDevices, setTotalDevices] = useState(0)
 
+    const [currentUniqueIdDevice, setCurrentUniqueIdDevice] = useState<string | null>(null);
 
     const [showTerminal, setShowTerminal] = useState(false);
     const [terminalInstance, setTerminalInstance] = useState<Terminal | null>(null);
@@ -53,6 +110,8 @@ const Dashboard: React.FC<{}> = () => {
     const [currentUrl, setCurrentUrl] = useState<string | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
 
+    const [currentSftpTimer, setCurrentSftpTimer] = useState<string | null>(null);
+
     const [showSftpLoginModal, setShowSftpLoginModal] = useState(false);
 
     const [showSftpModal, setShowSftpModal] = useState(false);
@@ -62,6 +121,9 @@ const Dashboard: React.FC<{}> = () => {
     const [isLoadingDeleteFile, setLoadingDeleteFile] = useState(false);
     const [isLoadingChangeName, setLoadingChangeName] = useState(false);
     const [isLoadingUploadFile, setLoadingUploadFile] = useState(false);
+
+    const [progressRemoteModal, setProgressRemoteModal] = useState(false);
+    const [progressRemoteMessage, setProgressRemoteMessage] = useState('');
 
     const [loginData, setLoginData] = useState({
         username: '',
@@ -77,20 +139,123 @@ const Dashboard: React.FC<{}> = () => {
 
     const [showDirectory, setShowDirectory] = useState('/home/user');
 
-    const handleSftpClick = (datetime: string, devicename: string, serialnumber: string) => {
+    const generateUniqueId = () => {
+        // Generate random letter (a-z) for the first character
+        const firstChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+
+        // Generate random alphanumeric string for the rest
+        const length = 10; // You can adjust the length as needed
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = firstChar;
+
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        return result;
+    };
+
+    // const mqtt_server_subscribe = (serialnumber: string) => {
+    //     const ws = new WebSocket(`ws://54.254.223.130:3001?=${serialnumber}`);  // Ganti dengan URL backend
+
+    //     // Ketika WebSocket terhubung
+    //     ws.onopen = () => {
+    //         console.log('Connected to WebSocket');
+    //         // Kirimkan topik yang ingin disubscribe
+    //         // const topic = 'test/topic';  // Ganti dengan topik yang diinginkan
+    //         ws.send("ready");
+    //     };
+
+    //     // Menunggu pesan dari backend
+    //     ws.onmessage = (event) => {
+    //         console.log('Received from backend:', event.data);
+    //         if (event.data === `${serialnumber}/reply/certificate`) {
+    //             setProgressRemoteModal(false);
+    //             ws.close();
+    //             console.log('WebSocket connection closed after receiving certificate reply');
+    //         }
+    //     };
+
+    //     // Ketika terjadi error di WebSocket
+    //     ws.onerror = (error) => {
+    //         console.log('WebSocket Error:', error);
+    //     };
+
+    //     // Menangani penutupan WebSocket
+    //     ws.onclose = () => {
+    //         console.log('Disconnected from WebSocket');
+    //     };
+    // };
+
+    // const mqtt_subscribe = (serialnumber: string) => {
+    //     const mqttClient = mqtt.connect({
+    //         ...MQTT_CONFIG,
+    //         clientId: `mqtt_${Math.random().toString(16).substr(2, 8)}`,
+    //         keepalive: 60,
+    //         clean: true,
+    //         reconnectPeriod: 1000,
+    //         connectTimeout: 30 * 1000,
+    //         protocol: 'mqtt' as 'mqtt' | 'mqtts' | 'ws' | 'wss',
+    //     });
+
+
+    //     mqttClient.on("connect", () => {
+    //         console.log("Connected to MQTT Broker!");
+    //         mqttClient.subscribe(`${serialnumber}/reply/#`, (err) => {
+    //             if (!err) {
+    //                 console.log(`Subscribed to topic: ${serialnumber}/reply/#`);
+    //             }
+    //         });
+    //     });
+
+    //     mqttClient.on("message", (topic, payload) => {
+    //         console.log(`Message received from ${topic}:`, payload.toString());
+    //         setMessage(payload.toString());
+
+    //         // Check if the topic is the certificate reply
+    //         if (topic === `${serialnumber}/reply/certificate`) {
+    //             setProgressRemoteModal(false);
+    //             // Unsubscribe from the topic
+    //             mqttClient.unsubscribe(`${serialnumber}/reply/#`, (err) => {
+    //                 if (!err) {
+    //                     console.log(`Unsubscribed from topic: ${serialnumber}/reply/#`);
+    //                 }
+    //             });
+    //             // End MQTT connection
+    //             mqttClient.end();
+    //         }
+    //     });
+
+    //     mqttClient.on("error", (err) => {
+    //         console.error("MQTT Error:", err);
+    //     });
+
+    //     setClient(mqttClient);
+
+    //     return () => {
+    //         if (mqttClient) {
+    //             mqttClient.end();
+    //             console.log("MQTT Disconnected");
+    //         }
+    //     };
+    // }
+
+    const handleSftpClick = (datetime: string, devicename: string, serialnumber: string, timer: string) => {
         setCurrentDeviceName(devicename);
         setCurrentSerialNumber(serialnumber);
         setCurrentDateTime(datetime);
+        setCurrentSftpTimer(timer);
         setShowSftpLoginModal(true);
     };
 
     const [sftpLoading, setSftpLoading] = useState(false);
 
 
-    const handleSftpSubmit = async (datetime: string, devicename: string, serialnumber: string, username: string, password: string) => {
-
+    const handleSftpSubmit = async (datetime: string, devicename: string, serialnumber: string, username: string, password: string, timer: string) => {
+        const id_req = generateUniqueId();
+        setCurrentUniqueIdDevice(id_req);
         setSftpLoading(true);
-        console.log('Submitting SFTP data:', { datetime, devicename, serialnumber, username, password });
+        console.log('Submitting SFTP data:', { datetime, devicename, serialnumber, username, password, timer });
         // const JSON_MESSAGE = JSON.stringify({
         //     username: formData.username,
         //     password: formData.password,
@@ -104,13 +269,16 @@ const Dashboard: React.FC<{}> = () => {
         // setShowSftpModal(true);
         // return
 
-        fetch('http://157.15.164.78:3001/enable-device/sftp/1', {
+        setProgressRemoteMessage('Prepairing...');
+        setProgressRemoteModal(true);
+
+        fetch('http://54.254.223.130:3001/enable-device/sftp/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ datetime, devicename, serialnumber }),
+            body: JSON.stringify({ id_req, datetime, devicename, serialnumber, timer }),
         })
             .then(async response => {
                 const data = await response.json();
@@ -129,6 +297,8 @@ const Dashboard: React.FC<{}> = () => {
                 const port = data.port;
 
                 if (port) {
+                    setProgressRemoteModal(false);
+
                     console.log('Port:', port);
                     setCurrentPort(port);
                     setShowDirectory('/home/user');
@@ -169,7 +339,7 @@ const Dashboard: React.FC<{}> = () => {
 
 
 
-        // fetch('http://157.15.164.78:3001/enable-device/ssh/1', {
+        // fetch('http://54.254.223.130:3001/enable-device/ssh/1', {
         //     method: 'POST',
         //     headers: {
         //         'Content-Type': 'application/json',
@@ -195,17 +365,17 @@ const Dashboard: React.FC<{}> = () => {
         //     });
     };
 
-    const handleSftpClose = async (datetime: string | null, devicename: string | null, serialnumber: string | null, port: string | null) => {
+    const handleSftpClose = async (id_req: string | null, datetime: string | null, devicename: string | null, serialnumber: string | null, port: string | null) => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://157.15.164.78:3001/enable-device/sftp/0', {
+            fetch('http://54.254.223.130:3001/enable-device/sftp/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ datetime, devicename, serialnumber, port }),
+                body: JSON.stringify({ id_req, datetime, devicename, serialnumber, port }),
             })
                 .then(response => response.json())
                 .then(data => {
@@ -243,7 +413,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchSftpData = async (JSON_MESSAGE: string) => {
         setLoadingFolder(true);
-        fetch('http://157.15.164.78:3001/sftp/list-dir', {
+        fetch('http://54.254.223.130:3001/sftp/list-dir', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -328,7 +498,7 @@ const Dashboard: React.FC<{}> = () => {
 
         try {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://157.15.164.78:3001/sftp/upload', true);
+            xhr.open('POST', 'http://54.254.223.130:3001/sftp/upload', true);
 
             xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
 
@@ -443,7 +613,7 @@ const Dashboard: React.FC<{}> = () => {
         setDownloadController(controller);
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/sftp/download', {
+            const response = await fetch('http://54.254.223.130:3001/sftp/download', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -524,7 +694,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/sftp/create-dir', {
+            const response = await fetch('http://54.254.223.130:3001/sftp/create-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -584,7 +754,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/sftp/delete-dir', {
+            const response = await fetch('http://54.254.223.130:3001/sftp/delete-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -626,7 +796,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/sftp/delete-file', {
+            const response = await fetch('http://54.254.223.130:3001/sftp/delete-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -687,7 +857,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/sftp/rename-file', {
+            const response = await fetch('http://54.254.223.130:3001/sftp/rename-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -739,7 +909,7 @@ const Dashboard: React.FC<{}> = () => {
     //         });
 
     //         // Lakukan tindakan dengan data SFTP yang dimasukkan (misalnya, kirim ke server)
-    //         fetch('http://157.15.164.78:3001/sftp-login', {
+    //         fetch('http://54.254.223.130:3001/sftp-login', {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json',
@@ -761,20 +931,28 @@ const Dashboard: React.FC<{}> = () => {
     //     }
     // };
 
-    const handleImageClick = (name: string, role: string, company: string, datetime: string, devicename: string, serialnumber: string) => {
+    const handleImageClick = (name: string, role: string, company: string, datetime: string, devicename: string, serialnumber: string, timer: string) => {
+        const id_req = generateUniqueId();
+
+        console.log(id_req);
+
+        setCurrentUniqueIdDevice(id_req);
         setCurrentDeviceName(devicename);
         setCurrentSerialNumber(serialnumber);
         setCurrentDateTime(datetime);
 
         console.log('Enable device:', serialnumber);
+        setProgressRemoteMessage('Prepairing...');
+        setProgressRemoteModal(true);
+        // mqtt_server_subscribe(serialnumber);
 
-        fetch('http://157.15.164.78:3001/enable-device/ssh/1', {
+        fetch('http://54.254.223.130:3001/enable-device/ssh/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ name, role, company, datetime, devicename, serialnumber }),
+            body: JSON.stringify({ id_req, name, role, company, datetime, devicename, serialnumber, timer }),
         })
             .then(async response => {
                 const data = await response.json()
@@ -788,6 +966,7 @@ const Dashboard: React.FC<{}> = () => {
                 }
 
                 console.log('Success:', data);
+                setProgressRemoteMessage('Device Ready');
 
                 // const output = data.output;
                 const port = data.port;
@@ -796,6 +975,7 @@ const Dashboard: React.FC<{}> = () => {
                     console.log('Port:', port);
                     setCurrentPort(port);
                     setShowTerminal(true);
+                    setProgressRemoteModal(false);
                 } else {
                     console.log('Port tidak ditemukan');
                     setErrorId('');
@@ -812,17 +992,19 @@ const Dashboard: React.FC<{}> = () => {
         // setShowTerminal(true);
     };
 
-    const handleTerminalClose = (datetime: string | null, devicename: string | null, serialnumber: string | null, port: string | null) => {
+    const handleTerminalClose = (id_req: string | null, datetime: string | null, devicename: string | null, serialnumber: string | null, port: string | null) => {
+        // const id_req = currentUniqueIdDevice;
+
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://157.15.164.78:3001/enable-device/ssh/0', {
+            fetch('http://54.254.223.130:3001/enable-device/ssh/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ datetime, devicename, serialnumber, port }),
+                body: JSON.stringify({ id_req, datetime, devicename, serialnumber, port }),
             })
                 .then(async response => { response.json() })
                 .then(data => {
@@ -838,19 +1020,25 @@ const Dashboard: React.FC<{}> = () => {
         // setshowterminal(false);
     }
 
-    const handleHttpsClick = (name: string, role: string, company: string, datetime: string, devicename: string, serialnumber: string) => {
+    const handleHttpsClick = (name: string, role: string, company: string, datetime: string, devicename: string, serialnumber: string, timer: string) => {
+        const id_req = generateUniqueId();
+        setCurrentUniqueIdDevice(id_req);
+
         setCurrentDeviceName(devicename);
         setCurrentSerialNumber(serialnumber);
 
+        setProgressRemoteMessage('Prepairing...');
+        setProgressRemoteModal(true);
+
         console.log(JSON.stringify({ datetime, devicename, serialnumber }));
 
-        fetch('http://157.15.164.78:3001/enable-device/http/1', {
+        fetch('http://54.254.223.130:3001/enable-device/http/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ name, role, company, datetime, devicename, serialnumber }),
+            body: JSON.stringify({ id_req, name, role, company, datetime, devicename, serialnumber, timer }),
         })
             .then(async response => {
                 const data = await response.json();
@@ -864,15 +1052,17 @@ const Dashboard: React.FC<{}> = () => {
                 }
 
                 console.log('Success:', data);
-
+                setProgressRemoteMessage('Device Ready...');
                 // const output = data.output;
                 const port = data.port;
                 if (port) {
+                    setProgressRemoteModal(false);
                     console.log('Port:', port);
                     setCurrentPort(port);
-                    const newUrl = `http://157.15.164.78:${port}`;
+                    const newUrl = `http://54.254.223.130:${port}`;
                     setCurrentUrl(newUrl); // Update the current URL with the new port
                     console.log('url:', newUrl);
+                    setShowBrowser(true);
                 } else {
                     setErrorId('');
                     setErrorMessage(`Failed to enable HTTP connection`);
@@ -885,23 +1075,20 @@ const Dashboard: React.FC<{}> = () => {
                 setErrorMessage(`Failed to enable HTTP connection`);
                 setShowErrorModal(true);
             });
-
-
-        setShowBrowser(true);
     };
 
-    const handleHttpClose = (datetime: string | null, devicename: string | null, serialnumber: string | null, port: string | null) => {
+    const handleHttpClose = (id_req: string | null, datetime: string | null, devicename: string | null, serialnumber: string | null, port: string | null) => {
         if (serialnumber) {
             setShowBrowser(false)
             console.log('Disable device:', serialnumber);
 
-            fetch('http://157.15.164.78:3001/enable-device/http/0', {
+            fetch('http://54.254.223.130:3001/enable-device/http/0', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ datetime, devicename, serialnumber, port }),
+                body: JSON.stringify({ id_req, datetime, devicename, serialnumber, port }),
             })
                 .then(response => response.json())
                 .then(data => {
@@ -957,7 +1144,7 @@ const Dashboard: React.FC<{}> = () => {
                             text = '';
                             terminal.write('\r\n');
                             // terminal.clear();
-                            socketRef.current = new WebSocket(`ws://157.15.164.78:3001?port=${currentPort}?username=${username}?password=${password}`);
+                            socketRef.current = new WebSocket(`ws://54.254.223.130:3001?port=${currentPort}?username=${username}?password=${password}`);
                             socketRef.current.onmessage = (event) => {
                                 if (event.data === 'SSH Connection failed: Incorrect username or password') {
                                     terminal.clear();
@@ -1002,7 +1189,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://157.15.164.78:3001/data', {
+            const response = await fetch('http://54.254.223.130:3001/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1110,7 +1297,8 @@ const Dashboard: React.FC<{}> = () => {
                     <div className="image-container">-</div>
                 ) : (
                     <div className="image-container">
-                        <a href="#" onClick={() => handleSftpClick(item.datetime, item.devicename, item.serialnumber)}>
+                        {/* <a href="#" onClick={() => handleSftpClick(item.datetime, item.devicename, item.serialnumber)}> */}
+                        <a href="#" onClick={() => handleSftpDurationClick(item.datetime, item.devicename, item.serialnumber)}>
                             <img src={folderImage} alt="SFTP" className="terminal-image" />
                         </a>
                     </div>
@@ -1125,7 +1313,7 @@ const Dashboard: React.FC<{}> = () => {
                     <div className="image-container">-</div>
                 ) : (
                     <div className="image-container">
-                        <a href="#" onClick={() => handleImageClick(name, role, company, item.datetime, item.devicename, item.serialnumber)}>
+                        <a href="#" onClick={() => handleSshDurationClick(item.datetime, item.devicename, item.serialnumber)}>
                             <img src={terminalImage} alt="SSH" className="terminal-image" />
                         </a>
                     </div>
@@ -1141,7 +1329,8 @@ const Dashboard: React.FC<{}> = () => {
                     <div className="image-container">-</div>
                 ) : (
                     <div className="image-container">
-                        <a href="#" onClick={() => handleHttpsClick(name, role, company, item.datetime, item.devicename, item.serialnumber)}>
+                        {/* <a href="#" onClick={() => handleHttpsClick(name, role, company, item.datetime, item.devicename, item.serialnumber)}> */}
+                        <a href="#" onClick={() => handleHttpsDurationClick(item.datetime, item.devicename, item.serialnumber)}>
                             <img src={internetImage} alt="HTTPS" className="internet-image" />
                         </a>
                     </div>
@@ -1234,7 +1423,7 @@ const Dashboard: React.FC<{}> = () => {
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">Terminal {currentDeviceName}</span>
-                            <span className="custom-modal-close" onClick={() => handleTerminalClose(currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
+                            <span className="custom-modal-close" onClick={() => handleTerminalClose(currentUniqueIdDevice, currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
                         </div>
                         <div id="terminal" style={{ height: 'calc(100% - 60px)', width: '100%' }}></div>
                     </div>
@@ -1245,9 +1434,10 @@ const Dashboard: React.FC<{}> = () => {
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">Website {currentDeviceName}</span>
-                            <span className="custom-modal-close" onClick={() => handleHttpClose(currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
+                            <span className="custom-modal-close" onClick={() => handleHttpClose(currentUniqueIdDevice, currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
                         </div>
-                        <iframe src={currentUrl || ''} style={{ height: 'calc(100% - 60px)', width: '100%' }}></iframe>
+                        <iframe src={currentUrl || ''} style={{ height: 'calc(100% - 60px)', width: '100%' }}>test</iframe>
+                        {/* <iframe src="https://asuracomic.net/" style={{ height: 'calc(100% - 60px)', width: '100%' }}>test</iframe> */}
                     </div>
                 </div>
             )}
@@ -1278,7 +1468,8 @@ const Dashboard: React.FC<{}> = () => {
                                             currentDeviceName || '',
                                             currentSerialNumber || '',
                                             loginData.username,
-                                            loginData.password
+                                            loginData.password,
+                                            currentSftpTimer || ''
                                         )}
                                     >
                                         Ok
@@ -1312,7 +1503,7 @@ const Dashboard: React.FC<{}> = () => {
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">SFTP</span>
-                            <span className="custom-modal-close" onClick={() => handleSftpClose(currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
+                            <span className="custom-modal-close" onClick={() => handleSftpClose(currentUniqueIdDevice, currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
                         </div>
                         <div className="custom-modal-body" style={{
                             display: 'flex',
@@ -1733,6 +1924,50 @@ const Dashboard: React.FC<{}> = () => {
                 {errorId && <div>Error ID: {errorId}</div>}
                 <div>Error Message: {errorMessage}</div>
             </Modal>
+            <Modal
+                visible={showRenameFileModal}
+                onDismiss={() => { if (!isLoadingChangeName) setShowRenameFileModal(false) }}
+                header="Rename File"
+                closeAriaLabel="Close modal"
+                footer={
+                    <>
+                        <Box float="right">
+
+                            {isLoadingChangeName ? (
+                                <>
+                                    <CircularProgress size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="primary" onClick={() => setShowRenameFileModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={handleRenameFileSubmit}>
+                                        OK
+                                    </Button>
+                                </>
+                            )}
+                        </Box>
+                    </>
+                }
+            >
+                <FormField label="New File Name">
+                    <Input
+                        value={renameFileName}
+                        onChange={e => setRenameFileName(e.detail.value)}
+                        placeholder="Enter new file name"
+                    />
+                </FormField>
+            </Modal>
+            <Modal
+                visible={progressRemoteModal}
+            // onDismiss={() => setShowErrorModal(false)}
+            // header="Progress"
+            // closeAriaLabel="Close modal"
+            >
+                <CircularProgress size={20} />
+                <div>{progressRemoteMessage}</div>
+            </Modal>
             {/* <Modal
                 visible={isDownloading}
                 // onDismiss={() => setShowDeleteFolderModal(false)}
@@ -1741,6 +1976,126 @@ const Dashboard: React.FC<{}> = () => {
             >
                 <ProgressBar value={downloadProgress} label="Downloading..." />
             </Modal> */}
+            <Modal
+                visible={showSshDurationModal}
+                onDismiss={() => setShowSshDurationModal(false)}
+                header="SSH Duration"
+                closeAriaLabel="Close modal"
+                footer={
+                    <Box float="right">
+                        <Button variant="normal" onClick={() => setShowSshDurationModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => {
+                                if (tempSshParams) {
+                                    handleImageClick(
+                                        name,
+                                        role,
+                                        company,
+                                        tempSshParams.datetime,
+                                        tempSshParams.devicename,
+                                        tempSshParams.serialnumber,
+                                        (parseInt(sshDuration) * 60).toString()
+                                    );
+                                }
+                                setShowSshDurationModal(false);
+                            }}
+                        >
+                            Connect
+                        </Button>
+                    </Box>
+                }
+            >
+                <FormField label="SSH Duration (minutes)">
+                    <Input
+                        type="number"
+                        value={sshDuration}
+                        onChange={e => setSshDuration(e.detail.value)}
+                        placeholder="Enter duration in minutes"
+                    />
+                </FormField>
+            </Modal>
+            <Modal
+                visible={showHttpDurationModal}
+                onDismiss={() => setShowHttpDurationModal(false)}
+                header="Http Duration"
+                closeAriaLabel="Close modal"
+                footer={
+                    <Box float="right">
+                        <Button variant="normal" onClick={() => setShowHttpDurationModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => {
+                                if (tempHttpParams) {
+                                    handleHttpsClick(
+                                        name,
+                                        role,
+                                        company,
+                                        tempHttpParams.datetime,
+                                        tempHttpParams.devicename,
+                                        tempHttpParams.serialnumber,
+                                        (parseInt(httpDuration) * 60).toString()
+                                    );
+                                }
+                                setShowHttpDurationModal(false);
+                            }}
+                        >
+                            Connect
+                        </Button>
+                    </Box>
+                }
+            >
+                <FormField label="Http Duration (minutes)">
+                    <Input
+                        type="number"
+                        value={httpDuration}
+                        onChange={e => setHttpDuration(e.detail.value)}
+                        placeholder="Enter duration in minutes"
+                    />
+                </FormField>
+            </Modal>
+            <Modal
+                visible={showSftpDurationModal}
+                onDismiss={() => setShowSftpDurationModal(false)}
+                header="SFTP Duration"
+                closeAriaLabel="Close modal"
+                footer={
+                    <Box float="right">
+                        <Button variant="normal" onClick={() => setShowSftpDurationModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => {
+                                if (tempSftpParams) {
+                                    handleSftpClick(
+                                        tempSftpParams.datetime,
+                                        tempSftpParams.devicename,
+                                        tempSftpParams.serialnumber,
+                                        (parseInt(sftpDuration) * 60).toString()
+                                    );
+                                }
+                                setShowSftpDurationModal(false);
+                            }}
+                        >
+                            Connect
+                        </Button>
+                    </Box>
+                }
+            >
+                <FormField label="SFTP Duration (minutes)">
+                    <Input
+                        type="number"
+                        value={sftpDuration}
+                        onChange={e => setSftpDuration(e.detail.value)}
+                        placeholder="Enter duration in minutes"
+                    />
+                </FormField>
+            </Modal>
         </>
     );
 };

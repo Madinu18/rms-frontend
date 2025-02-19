@@ -55,7 +55,7 @@ const List_Company: React.FC<{}> = () => {
             created_by: idUser
         });
         try {
-            const response = await fetch('http://157.15.164.78:3001/company', {
+            const response = await fetch('http://54.254.223.130:3001/company', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ const List_Company: React.FC<{}> = () => {
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
 
         try {
-            const response = await fetch('http://157.15.164.78:3001/company/delete', {
+            const response = await fetch('http://54.254.223.130:3001/company/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const List_Company: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://157.15.164.78:3001/company/update', {
+            const response = await fetch('http://54.254.223.130:3001/company/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

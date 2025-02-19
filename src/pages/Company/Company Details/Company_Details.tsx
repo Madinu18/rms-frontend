@@ -27,9 +27,9 @@ const Company_Details: React.FC<{}> = () => {
         const fetchData = async () => {
             const JSON_MESSAGE = JSON.stringify({ id_company: id });
             try {
-                const response = await fetch('http://157.15.164.78:3001/company/details', {
+                const response = await fetch('http://54.254.223.130:3001/company/details', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + localStorage.getItem('token')
                     },
@@ -50,9 +50,9 @@ const Company_Details: React.FC<{}> = () => {
     const fetchWholeDevice = async () => {
         const JSON_MESSAGE = JSON.stringify({ id_role: idRole, id_user: idUser });
         try {
-            const response = await fetch('http://157.15.164.78:3001/devices', {
+            const response = await fetch('http://54.254.223.130:3001/devices', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
@@ -69,9 +69,9 @@ const Company_Details: React.FC<{}> = () => {
     const fetchDataDevice = async () => {
         const JSON_MESSAGE = JSON.stringify({ id_user: companyInfo.id_user_manager });
         try {
-            const response = await fetch('http://157.15.164.78:3001/devices', {
+            const response = await fetch('http://54.254.223.130:3001/devices', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
@@ -117,9 +117,9 @@ const Company_Details: React.FC<{}> = () => {
             });
 
             try {
-                const response = await fetch('http://157.15.164.78:3001/devices/delete', {
+                const response = await fetch('http://54.254.223.130:3001/devices/delete', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + localStorage.getItem('token')
                     },
@@ -174,9 +174,9 @@ const Company_Details: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://157.15.164.78:3001/devices/update', {
+            const response = await fetch('http://54.254.223.130:3001/devices/update', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
