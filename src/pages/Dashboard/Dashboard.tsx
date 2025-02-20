@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Button, Container, FormField, Header, Input, Modal, SpaceBetween, Table, TextFilter, ProgressBar } from '@cloudscape-design/components';
+import { Box, Button, Container, FormField, Header, Input, Modal, SpaceBetween, Table, TextFilter, ProgressBar, Pagination } from '@cloudscape-design/components';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,10 +25,10 @@ import downloadIcon from '../../assets/download.png'; // Import download icon
 // import { useState, useMemo, useCallback } from "react";
 // import { Link } from "react-router-dom";
 
-// const MQTT_BROKER_URL = "mqtt://54.254.223.130:1883"; // Ganti dengan broker MQTT kamu
+// const MQTT_BROKER_URL = "mqtt://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:1883"; // Ganti dengan broker MQTT kamu
 
 // const MQTT_CONFIG = {
-//     hostname: '54.254.223.130',
+//     hostname: 'ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com',
 //     port: 1883,
 //     protocol: 'mqtt',
 //     path: '/mqtt'
@@ -156,7 +156,7 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     // const mqtt_server_subscribe = (serialnumber: string) => {
-    //     const ws = new WebSocket(`ws://54.254.223.130:3001?=${serialnumber}`);  // Ganti dengan URL backend
+    //     const ws = new WebSocket(`ws://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001?=${serialnumber}`);  // Ganti dengan URL backend
 
     //     // Ketika WebSocket terhubung
     //     ws.onopen = () => {
@@ -272,7 +272,7 @@ const Dashboard: React.FC<{}> = () => {
         setProgressRemoteMessage('Prepairing...');
         setProgressRemoteModal(true);
 
-        fetch('http://54.254.223.130:3001/enable-device/sftp/1', {
+        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/sftp/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -339,7 +339,7 @@ const Dashboard: React.FC<{}> = () => {
 
 
 
-        // fetch('http://54.254.223.130:3001/enable-device/ssh/1', {
+        // fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/ssh/1', {
         //     method: 'POST',
         //     headers: {
         //         'Content-Type': 'application/json',
@@ -369,7 +369,7 @@ const Dashboard: React.FC<{}> = () => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://54.254.223.130:3001/enable-device/sftp/0', {
+            fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/sftp/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
@@ -413,7 +413,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchSftpData = async (JSON_MESSAGE: string) => {
         setLoadingFolder(true);
-        fetch('http://54.254.223.130:3001/sftp/list-dir', {
+        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/list-dir', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -498,7 +498,7 @@ const Dashboard: React.FC<{}> = () => {
 
         try {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://54.254.223.130:3001/sftp/upload', true);
+            xhr.open('POST', 'http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/upload', true);
 
             xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
 
@@ -613,7 +613,7 @@ const Dashboard: React.FC<{}> = () => {
         setDownloadController(controller);
 
         try {
-            const response = await fetch('http://54.254.223.130:3001/sftp/download', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/download', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -694,7 +694,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://54.254.223.130:3001/sftp/create-dir', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/create-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -754,7 +754,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://54.254.223.130:3001/sftp/delete-dir', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/delete-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -796,7 +796,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://54.254.223.130:3001/sftp/delete-file', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/delete-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -857,7 +857,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://54.254.223.130:3001/sftp/rename-file', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/rename-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -909,7 +909,7 @@ const Dashboard: React.FC<{}> = () => {
     //         });
 
     //         // Lakukan tindakan dengan data SFTP yang dimasukkan (misalnya, kirim ke server)
-    //         fetch('http://54.254.223.130:3001/sftp-login', {
+    //         fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp-login', {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json',
@@ -946,7 +946,7 @@ const Dashboard: React.FC<{}> = () => {
         setProgressRemoteModal(true);
         // mqtt_server_subscribe(serialnumber);
 
-        fetch('http://54.254.223.130:3001/enable-device/ssh/1', {
+        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/ssh/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -998,7 +998,7 @@ const Dashboard: React.FC<{}> = () => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://54.254.223.130:3001/enable-device/ssh/0', {
+            fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/ssh/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
@@ -1032,7 +1032,7 @@ const Dashboard: React.FC<{}> = () => {
 
         console.log(JSON.stringify({ datetime, devicename, serialnumber }));
 
-        fetch('http://54.254.223.130:3001/enable-device/http/1', {
+        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/http/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1059,7 +1059,7 @@ const Dashboard: React.FC<{}> = () => {
                     setProgressRemoteModal(false);
                     console.log('Port:', port);
                     setCurrentPort(port);
-                    const newUrl = `http://54.254.223.130:${port}`;
+                    const newUrl = `http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:${port}`;
                     setCurrentUrl(newUrl); // Update the current URL with the new port
                     console.log('url:', newUrl);
                     setShowBrowser(true);
@@ -1082,7 +1082,7 @@ const Dashboard: React.FC<{}> = () => {
             setShowBrowser(false)
             console.log('Disable device:', serialnumber);
 
-            fetch('http://54.254.223.130:3001/enable-device/http/0', {
+            fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/http/0', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1144,7 +1144,7 @@ const Dashboard: React.FC<{}> = () => {
                             text = '';
                             terminal.write('\r\n');
                             // terminal.clear();
-                            socketRef.current = new WebSocket(`ws://54.254.223.130:3001?port=${currentPort}?username=${username}?password=${password}`);
+                            socketRef.current = new WebSocket(`ws://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001?port=${currentPort}?username=${username}?password=${password}`);
                             socketRef.current.onmessage = (event) => {
                                 if (event.data === 'SSH Connection failed: Incorrect username or password') {
                                     terminal.clear();
@@ -1189,7 +1189,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://54.254.223.130:3001/data', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1251,6 +1251,18 @@ const Dashboard: React.FC<{}> = () => {
         const dateB = new Date(b.datetime);
         return dateB.getTime() - dateA.getTime(); // Urutkan berdasarkan tanggal (terbaru di atas)
     });
+
+    const [currentPageIndex, setCurrentPageIndex] = useState(1);
+    const itemsPerPage = 14;
+
+    const handlePaginationChange = ({ detail }: { detail: { currentPageIndex: number } }) => {
+        setCurrentPageIndex(detail.currentPageIndex);
+    };
+
+    const paginatedItems = sortedDevices.slice(
+        (currentPageIndex - 1) * itemsPerPage,
+        currentPageIndex * itemsPerPage
+    );
 
     const columnDefinitions = [
         {
@@ -1394,8 +1406,8 @@ const Dashboard: React.FC<{}> = () => {
                         `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
                     }
                     columnDefinitions={columnDefinitions}
-                    enableKeyboardNavigation
-                    items={sortedDevices}
+                    // enableKeyboardNavigation
+                    items={paginatedItems}
                     loadingText="Loading resources"
 
                     empty={
@@ -1416,7 +1428,15 @@ const Dashboard: React.FC<{}> = () => {
                             filteringText=""
                         />
                     }
+                    pagination={
+                        <Pagination
+                            currentPageIndex={currentPageIndex}
+                            onChange={handlePaginationChange}
+                            pagesCount={Math.ceil(sortedDevices.length / itemsPerPage)}
+                        />
+                    }
                 />
+
             </div>
             {showTerminal && (
                 <div className="custom-modal">
@@ -1870,41 +1890,6 @@ const Dashboard: React.FC<{}> = () => {
                 }
             >
                 Are you sure you want to delete file {deleteFileName}?
-            </Modal>
-            <Modal
-                visible={showRenameFileModal}
-                onDismiss={() => { if (!isLoadingChangeName) setShowRenameFileModal(false) }}
-                header="Rename File"
-                closeAriaLabel="Close modal"
-                footer={
-                    <>
-                        <Box float="right">
-
-                            {isLoadingChangeName ? (
-                                <>
-                                    <CircularProgress size={20} />
-                                </>
-                            ) : (
-                                <>
-                                    <Button variant="primary" onClick={() => setShowRenameFileModal(false)}>
-                                        Cancel
-                                    </Button>
-                                    <Button variant="primary" onClick={handleRenameFileSubmit}>
-                                        OK
-                                    </Button>
-                                </>
-                            )}
-                        </Box>
-                    </>
-                }
-            >
-                <FormField label="New File Name">
-                    <Input
-                        value={renameFileName}
-                        onChange={e => setRenameFileName(e.detail.value)}
-                        placeholder="Enter new file name"
-                    />
-                </FormField>
             </Modal>
             <Modal
                 visible={showErrorModal}

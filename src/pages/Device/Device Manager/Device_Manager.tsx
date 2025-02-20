@@ -61,7 +61,7 @@ const Device_Manager: React.FC<{}> = () => {
                 id_company: idCompany
             });
             console.log('JSON_MESSAGE:', JSON_MESSAGE);
-            const response = await fetch('http://54.254.223.130:3001/device-manager', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/device-manager', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ const Device_Manager: React.FC<{}> = () => {
             id_user: idUserLogin
         })
         try {
-            const response = await fetch('http://54.254.223.130:3001/devices', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ const Device_Manager: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://54.254.223.130:3001/devices-manager/list', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices-manager/list', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ const Device_Manager: React.FC<{}> = () => {
 
     const updateAccesibleDevice = async (JSON_MESSAGE: string) => {
         try {
-            const response = await fetch('http://54.254.223.130:3001/devices-manager/user/update-device', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices-manager/user/update-device', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

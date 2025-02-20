@@ -62,7 +62,7 @@ const Create_User: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://54.254.223.130:3001/devices', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ const Create_User: React.FC = () => {
         console.log(JSON_MESSAGE);
 
         try {
-            const response = await fetch('http://54.254.223.130:3001/user/create', {
+            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/user/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
