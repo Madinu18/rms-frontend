@@ -1,7 +1,7 @@
 import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { FlashbarProvider } from './context/FlashbarContext';
-// import './index.css'
+import './index.css'
 import App from './App'
 import Login from './Login'
 
@@ -18,7 +18,7 @@ const Main = () => {
   return (
     <StrictMode>
       <FlashbarProvider>
-      {isAuthenticated ? <App signOut={() => setIsAuthenticated(false)} user={undefined} /> : <Login onLogin={() => setIsAuthenticated(true)} />}
+        {isAuthenticated ? <App signOut={() => setIsAuthenticated(false)} user={undefined} /> : <Login onLogin={() => setIsAuthenticated(true)} />}
       </FlashbarProvider>
     </StrictMode>
   );

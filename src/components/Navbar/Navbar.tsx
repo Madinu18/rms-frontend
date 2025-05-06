@@ -2,6 +2,7 @@ import React from 'react';
 import { TopNavigation } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router-dom';
 
+import './Navbar.css';
 
 // Definisi tipe props
 interface NavbarProps {
@@ -30,6 +31,9 @@ const Navbar: React.FC<NavbarProps> = ({ signOut, user }) => {
 
   return (
     <div className="navbar">
+      {/* <div className="navbar-box">
+        Kotak Tambahan
+      </div> */}
       <TopNavigation
         identity={{
           href: "#",

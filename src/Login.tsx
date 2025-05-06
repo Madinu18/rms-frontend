@@ -26,7 +26,7 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
     });
 
     try {
-      const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/login', {
+      const response = await fetch('http://monitoring.qimtronics.com:3001/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -84,36 +84,36 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-header">
-        <img src={qimtronics_login} alt="logo" className="qimstronics-login-image" />
-        <h1 className="app-title">Remote System Management</h1>
-      </div>
-      <div className="separator"></div>
-      <div className="login-box">
-        <form onSubmit={handleSubmit} className="login-form">
-          <h2 className="login-title">Login</h2>
-          <div className="input-group">
-            <label>Username</label>
-            <input type="text" value={username} onChange={(e) => setUsernameLogin(e.target.value)} />
-          </div>
-          <div className="input-group">
-            <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPasswordLogin(e.target.value)} />
-          </div>
-
-          {errorMessage && (
-            <div className="error-message">
-              <span className="error-text">{errorMessage}</span>
-              <button type="button" className="close-button" onClick={handleCloseError}>×</button>
+    <div className='login-page'>
+      <div className="login-container">
+        <div className="login-header">
+          <img src={qimtronics_login} alt="logo" className="qimstronics-login-image" />
+          <h1 className="app-title">Remote System Management</h1>
+        </div>
+        <div className="separator"></div>
+        <div className="login-box">
+          <form onSubmit={handleSubmit} className="login-form">
+            <h2 className="login-title">Login</h2>
+            <div className="input-group">
+              <label>Username</label>
+              <input type="text" value={username} onChange={(e) => setUsernameLogin(e.target.value)} />
             </div>
-          )}
+            <div className="input-group">
+              <label>Password</label>
+              <input type="password" value={password} onChange={(e) => setPasswordLogin(e.target.value)} />
+            </div>
 
-          <button type="submit" className="login-button">Login</button>
-        </form>
+            {errorMessage && (
+              <div className="error-message">
+                <span className="error-text">{errorMessage}</span>
+                <button type="button" className="close-button" onClick={handleCloseError}>×</button>
+              </div>
+            )}
+
+            <button type="submit" className="login-button">Login</button>
+          </form>
+        </div>
       </div>
-
-
     </div>
   );
 };

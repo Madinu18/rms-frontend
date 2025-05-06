@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { Header, Table, Box, SpaceBetween, TextFilter, Button, Modal, Multiselect } from '@cloudscape-design/components';
 import './Device_Manager.css';
 import { useEffect, useState } from 'react';
@@ -61,7 +64,7 @@ const Device_Manager: React.FC<{}> = () => {
                 id_company: idCompany
             });
             console.log('JSON_MESSAGE:', JSON_MESSAGE);
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/device-manager', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/device-manager', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,7 +91,7 @@ const Device_Manager: React.FC<{}> = () => {
             id_user: idUserLogin
         })
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -156,7 +159,7 @@ const Device_Manager: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices-manager/list', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices-manager/list', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -217,7 +220,7 @@ const Device_Manager: React.FC<{}> = () => {
 
     const updateAccesibleDevice = async (JSON_MESSAGE: string) => {
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices-manager/user/update-device', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices-manager/user/update-device', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -240,10 +243,16 @@ const Device_Manager: React.FC<{}> = () => {
         return !deviceList.some(existingDevice => existingDevice.serialnumber === device.value);
     });
 
+    const [filteringText, setFilteringText] = useState("");
+
+    const filteredDataUser = dataUser.filter(item =>
+        item.name?.toLowerCase().includes(filteringText.toLowerCase())
+    );
+
     return (
         <>
             <SharedFlashbar />
-            <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+            <div style={{ padding: '20px', borderRadius: '8px' }}>
                 <Table
                     renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
                         `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
@@ -251,7 +260,6 @@ const Device_Manager: React.FC<{}> = () => {
                     columnDefinitions={[
                         { id: "username", header: "Username", cell: item => item.username || "-" },
                         { id: "name", header: "Name", cell: item => item.name || "-" },
-                        // { id: "accesible_device", header: "Accesible Device", cell: item => item.accessible_device || "-" },
                         {
                             id: "manage_device",
                             header: <div style={{ textAlign: 'center' }}>Manage Devices</div>,
@@ -276,7 +284,7 @@ const Device_Manager: React.FC<{}> = () => {
                         }
                     ]}
                     enableKeyboardNavigation
-                    items={dataUser}
+                    items={filteredDataUser} // Gunakan data yang sudah difilter
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
@@ -287,7 +295,11 @@ const Device_Manager: React.FC<{}> = () => {
                         </Box>
                     }
                     filter={
-                        <TextFilter filteringPlaceholder="Find resources" filteringText="" />
+                        <TextFilter
+                            filteringPlaceholder="Find by Name"
+                            filteringText={filteringText}
+                            onChange={({ detail }) => setFilteringText(detail.filteringText)}
+                        />
                     }
                     header={
                         <Header>
@@ -298,7 +310,7 @@ const Device_Manager: React.FC<{}> = () => {
                     selectedItems={selectedItems}
                     onSelectionChange={event => setSelectedItems(event.detail.selectedItems)}
                 />
-
+                {/* Modal and other components remain unchanged */}
                 <Modal
                     visible={isManageDeviceModalOpen}
                     onDismiss={handleManageDeviceCancel}

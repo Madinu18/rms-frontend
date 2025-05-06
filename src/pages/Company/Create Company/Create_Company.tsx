@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormField, Input, Header, Button, Select, Multiselect, Modal, Box } from '@cloudscape-design/components';
 import './Create_Company.css';
 import { useState, useEffect } from 'react';
@@ -55,7 +57,7 @@ const Create_Company: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,7 +130,7 @@ const Create_Company: React.FC = () => {
         });
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/company/create', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/company/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +188,7 @@ const Create_Company: React.FC = () => {
                 />
             </div>
 
-            <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+            <div style={{ padding: '20px', borderRadius: '8px' }}>
                 <div style={{ marginBottom: '20px' }}>
                     <Header>Create Company</Header>
                 </div>

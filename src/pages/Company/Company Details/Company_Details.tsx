@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Header, Table, Box, SpaceBetween, TextFilter, Button, Modal, Container } from '@cloudscape-design/components';
 import './Company_Details.css';
 import Breadcrumb from '../../../components/Breadcrumb/Breadcrumb';
@@ -22,12 +25,13 @@ const Company_Details: React.FC<{}> = () => {
     const [isAddModalOpen, setAddModalOpen] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const [filteringText, setFilteringText] = useState<string>('');
 
     useEffect(() => {
         const fetchData = async () => {
             const JSON_MESSAGE = JSON.stringify({ id_company: id });
             try {
-                const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/company/details', {
+                const response = await fetch('http://monitoring.qimtronics.com:3001/company/details', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -50,7 +54,7 @@ const Company_Details: React.FC<{}> = () => {
     const fetchWholeDevice = async () => {
         const JSON_MESSAGE = JSON.stringify({ id_role: idRole, id_user: idUser });
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -69,7 +73,7 @@ const Company_Details: React.FC<{}> = () => {
     const fetchDataDevice = async () => {
         const JSON_MESSAGE = JSON.stringify({ id_user: companyInfo.id_user_manager });
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,6 +104,10 @@ const Company_Details: React.FC<{}> = () => {
         return nameA.localeCompare(nameB);
     });
 
+    const filteredDevicesByName = sortedDevices.filter(device =>
+        device.devicename?.toLowerCase().includes(filteringText.toLowerCase())
+    );
+
     const handleDelete = async () => {
         if (selectedItems.length > 0) {
             const serialNumbersToDelete = selectedItems.map(item => item.serialnumber);
@@ -117,7 +125,7 @@ const Company_Details: React.FC<{}> = () => {
             });
 
             try {
-                const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices/delete', {
+                const response = await fetch('http://monitoring.qimtronics.com:3001/devices/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -174,7 +182,7 @@ const Company_Details: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/devices/update', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/devices/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,7 +233,7 @@ const Company_Details: React.FC<{}> = () => {
                     ]}
                 />
             </div>
-            <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+            <div style={{ padding: '20px', borderRadius: '8px' }}>
                 <div style={{ marginBottom: '20px' }}>
                     <Container
                         header={
@@ -253,7 +261,7 @@ const Company_Details: React.FC<{}> = () => {
                         { id: 'serialnumber', header: 'Serial Number', cell: item => item?.serialnumber || '-' },
                     ]}
                     enableKeyboardNavigation
-                    items={sortedDevices}
+                    items={filteredDevicesByName} // Gunakan data yang sudah difilter
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
@@ -263,7 +271,13 @@ const Company_Details: React.FC<{}> = () => {
                             </SpaceBetween>
                         </Box>
                     }
-                    filter={<TextFilter filteringPlaceholder="Find resources" filteringText={''} />}
+                    filter={
+                        <TextFilter
+                            filteringPlaceholder="Find resources"
+                            filteringText={filteringText} // Hubungkan dengan state
+                            onChange={({ detail }) => setFilteringText(detail.filteringText)} // Perbarui state saat teks berubah
+                        />
+                    }
                     header={
                         <Header
                             actions={

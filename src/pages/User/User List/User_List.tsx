@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { Header, Table, Box, SpaceBetween, TextFilter, Button, Modal, FormField, Input } from '@cloudscape-design/components';
 import './User_List.css';
 import { useEffect, useState } from 'react';
@@ -18,6 +22,8 @@ const User_List: React.FC<{}> = () => {
 
     const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
     const [errorModalMessage, setErrorModalMessage] = useState("");
+
+    const [filterText, setFilterText] = useState("");
 
     const navigate = useNavigate();
     const { addFlashbarItem } = useFlashbar();
@@ -61,7 +67,7 @@ const User_List: React.FC<{}> = () => {
                 id_company: idCompany
             });
             console.log('JSON_MESSAGE:', JSON_MESSAGE);
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/user', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,7 +111,7 @@ const User_List: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/user/delete', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/user/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +170,7 @@ const User_List: React.FC<{}> = () => {
                 new_password: resetPasswordData.newPassword
             });
             console.log('Reset password payload:', JSON_MESSAGE);
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/user/reset-password', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/user/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -193,10 +199,14 @@ const User_List: React.FC<{}> = () => {
         setResetPasswordData({ newPassword: '', confirmPassword: '' });
     };
 
+    const filteredDataUser = dataUser.filter(item =>
+        item.name?.toLowerCase().includes(filterText.toLowerCase())
+    );
+
     return (
         <>
             <SharedFlashbar />
-            <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+            <div style={{ padding: '20px', borderRadius: '8px' }}>
                 <Table
                     renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
                         `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
@@ -230,7 +240,7 @@ const User_List: React.FC<{}> = () => {
                         }
                     ]}
                     enableKeyboardNavigation
-                    items={dataUser}
+                    items={filteredDataUser}
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
@@ -241,7 +251,11 @@ const User_List: React.FC<{}> = () => {
                         </Box>
                     }
                     filter={
-                        <TextFilter filteringPlaceholder="Find resources" filteringText="" />
+                        <TextFilter
+                            filteringPlaceholder="Find by Name"
+                            filteringText={filterText}
+                            onChange={e => setFilterText(e.detail.filteringText)}
+                        />
                     }
                     header={
                         <Header

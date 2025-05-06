@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Header, Table, Box, SpaceBetween, TextFilter, Button, Modal, FormField, Input, Select } from '@cloudscape-design/components';
 import { Link } from 'react-router-dom';
 import './Company_List.css';
@@ -22,6 +24,8 @@ const List_Company: React.FC<{}> = () => {
 
     const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
     const [errorModalMessage, setErrorModalMessage] = useState("");
+
+    const [filteringText, setFilteringText] = useState("");
 
     const navigate = useNavigate();
     const { addFlashbarItem } = useFlashbar();
@@ -55,7 +59,7 @@ const List_Company: React.FC<{}> = () => {
             created_by: idUser
         });
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/company', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/company', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +117,7 @@ const List_Company: React.FC<{}> = () => {
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/company/delete', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/company/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,7 +165,7 @@ const List_Company: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/company/update', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/company/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -203,10 +207,14 @@ const List_Company: React.FC<{}> = () => {
         }));
     };
 
+    const filteredData = dataCompany.filter(item =>
+        item.company_name.toLowerCase().includes(filteringText.toLowerCase())
+    );
+
     return (
         <>
             <SharedFlashbar />
-            <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+            <div style={{ padding: '20px', borderRadius: '8px' }}>
                 <Table
                     renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
                         `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
@@ -223,7 +231,7 @@ const List_Company: React.FC<{}> = () => {
                         { id: "person_in_charge", header: "Person in Charge", cell: item => item.company_person_in_charge || "-" }
                     ]}
                     enableKeyboardNavigation
-                    items={dataCompany}
+                    items={filteredData}
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
@@ -234,7 +242,11 @@ const List_Company: React.FC<{}> = () => {
                         </Box>
                     }
                     filter={
-                        <TextFilter filteringPlaceholder="Find resources" filteringText="" />
+                        <TextFilter
+                            filteringPlaceholder="Find by company name"
+                            filteringText={filteringText}
+                            onChange={e => setFilteringText(e.detail.filteringText)}
+                        />
                     }
                     header={
                         <Header

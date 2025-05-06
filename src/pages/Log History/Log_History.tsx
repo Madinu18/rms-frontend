@@ -1,4 +1,7 @@
-import { Header, Table, Box, SpaceBetween, TextFilter, Button } from '@cloudscape-design/components';
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-empty-pattern */
+import { Header, Table, Box, SpaceBetween, TextFilter, Button, Pagination } from '@cloudscape-design/components';
 import './Log_History.css';
 import { useEffect, useState } from 'react';
 import { parse, addHours as addHoursToDate, format } from 'date-fns';
@@ -9,16 +12,25 @@ const addHours = (timestamp: string, hours: number) => {
     return format(newDate, 'dd/MM/yyyy HH:mm:ss');
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const parseDate = (str: string): Date => {
+    const [datePart, timePart] = str.split(' ');
+    const [day, month, year] = datePart.split('/');
+    return new Date(`${year}-${month}-${day}T${timePart}`);
+};
+
 const Log_History: React.FC<{}> = ({ }) => {
     const [dataLog, setDataLog] = useState<any[]>([]);
+    const [filteredDataLog, setFilteredDataLog] = useState<any[]>([]); // State untuk data yang difilter
+    const [filteringText, setFilteringText] = useState(""); // State untuk teks filter
+    const [currentPageIndex, setCurrentPageIndex] = useState(1);
+    const itemsPerPage = 18;
 
     useEffect(() => {
         let isMounted = true;
 
         const fetchData = async () => {
             try {
-                const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/log-history', {
+                const response = await fetch('http://monitoring.qimtronics.com:3001/log-history', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -30,8 +42,11 @@ const Log_History: React.FC<{}> = ({ }) => {
                 }
                 const json = await response.json();
                 if (isMounted) {
-
-                    setDataLog(json.data);
+                    const sortedData = json.data.sort((a: { timestamp: string; }, b: { timestamp: string; }) =>
+                        parseDate(b.timestamp).getTime() - parseDate(a.timestamp).getTime()
+                    );
+                    setDataLog(sortedData);
+                    setFilteredDataLog(sortedData); // Inisialisasi data yang difilter
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -48,13 +63,22 @@ const Log_History: React.FC<{}> = ({ }) => {
         };
     }, []);
 
+    // Logika filtering berdasarkan Device Name
+    useEffect(() => {
+        const filtered = dataLog.filter(item =>
+            item.devicename?.toLowerCase().includes(filteringText.toLowerCase())
+        );
+        setFilteredDataLog(filtered);
+        setCurrentPageIndex(1); // Reset ke halaman pertama saat filter berubah
+    }, [filteringText, dataLog]);
 
-    console.log(dataLog);
-
-
+    const paginatedItems = filteredDataLog.slice(
+        (currentPageIndex - 1) * itemsPerPage,
+        currentPageIndex * itemsPerPage
+    );
 
     return (
-        <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+        <div style={{ padding: '20px', borderRadius: '8px' }}>
             <Table
                 renderAriaLive={({
                     firstIndex,
@@ -101,7 +125,7 @@ const Log_History: React.FC<{}> = ({ }) => {
                     }
                 ]}
                 enableKeyboardNavigation
-                items={dataLog}
+                items={paginatedItems}
                 loadingText="Loading resources"
                 empty={
                     <Box
@@ -117,16 +141,21 @@ const Log_History: React.FC<{}> = ({ }) => {
                 }
                 filter={
                     <TextFilter
-                        filteringPlaceholder="Find resources"
-                        filteringText=""
+                        filteringPlaceholder="Find by Device Name"
+                        filteringText={filteringText}
+                        onChange={({ detail }) => setFilteringText(detail.filteringText)} // Update teks filter
                     />
                 }
                 header={
                     <Header>Device List</Header>
                 }
-            // pagination={
-            //     <Pagination currentPageIndex={1} pagesCount={1} />
-            // }
+                pagination={
+                    <Pagination
+                        currentPageIndex={currentPageIndex}
+                        pagesCount={Math.ceil(filteredDataLog.length / itemsPerPage)}
+                        onChange={({ detail }) => setCurrentPageIndex(detail.currentPageIndex)}
+                    />
+                }
             />
         </div>
     );

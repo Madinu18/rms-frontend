@@ -1,34 +1,33 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Button, Container, FormField, Header, Input, Modal, SpaceBetween, Table, TextFilter, ProgressBar, Pagination } from '@cloudscape-design/components';
 import { Terminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// import { FitAddon } from 'xterm-addon-fit';
 // import mqtt, { MqttClient } from "mqtt";
 import 'xterm/css/xterm.css';
-// import { CircularProgress } from '@material-ui/core'; // Import CircularProgress from Material-UI
 import { CircularProgress } from '@mui/material'; // Updated import
 
 
 import './Dashboard.css';
-import './CustomModal.css'; // Import custom modal CSS
+import './CustomModal.css';
 
 import terminalImage from '../../assets/terminal.png';
 import internetImage from '../../assets/internet.png';
 import folderImage from '../../assets/folder.png';
 import backArrowImage from '../../assets/back-arrow.png';
-import trashIcon from '../../assets/trash.png'; // Import trash icon
-import changeNameIcon from '../../assets/edit.png'; // Import change name icon
-import downloadIcon from '../../assets/download.png'; // Import download icon
+import trashIcon from '../../assets/trash.png';
+import changeNameIcon from '../../assets/edit.png';
+import downloadIcon from '../../assets/download.png';
 // import { useState, useMemo, useCallback } from "react";
 // import { Link } from "react-router-dom";
 
-// const MQTT_BROKER_URL = "mqtt://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:1883"; // Ganti dengan broker MQTT kamu
+// const MQTT_BROKER_URL = "mqtt://monitoring.qimtronics.com:1883"; // Ganti dengan broker MQTT kamu
 
 // const MQTT_CONFIG = {
-//     hostname: 'ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com',
+//     hostname: 'monitoring.qimtronics.com',
 //     port: 1883,
 //     protocol: 'mqtt',
 //     path: '/mqtt'
@@ -36,9 +35,7 @@ import downloadIcon from '../../assets/download.png'; // Import download icon
 // const MQTT_TOPIC = "+/reply/#";
 
 const Dashboard: React.FC<{}> = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     // const [client, setClient] = useState<MqttClient | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     // const [message, setMessage] = useState<string>("");
 
     const name = localStorage.getItem('name') || '';
@@ -79,6 +76,12 @@ const Dashboard: React.FC<{}> = () => {
     } | null>(null);
 
     const handleSshDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        if (showTerminal) {
+            setErrorId('');
+            setErrorMessage('Please close the current terminal before starting new SSH session');
+            setShowErrorModal(true);
+            return;
+        }
         setTempSshParams({ datetime, devicename, serialnumber });
         setShowSshDurationModal(true);
     };
@@ -156,7 +159,7 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     // const mqtt_server_subscribe = (serialnumber: string) => {
-    //     const ws = new WebSocket(`ws://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001?=${serialnumber}`);  // Ganti dengan URL backend
+    //     const ws = new WebSocket(`ws://monitoring.qimtronics.com:3001?=${serialnumber}`);  // Ganti dengan URL backend
 
     //     // Ketika WebSocket terhubung
     //     ws.onopen = () => {
@@ -272,13 +275,13 @@ const Dashboard: React.FC<{}> = () => {
         setProgressRemoteMessage('Prepairing...');
         setProgressRemoteModal(true);
 
-        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/sftp/1', {
+        fetch('http://monitoring.qimtronics.com:3001/enable-device/sftp/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ id_req, datetime, devicename, serialnumber, timer }),
+            body: JSON.stringify({ id_req, name, role, company, datetime, devicename, serialnumber, timer }),
         })
             .then(async response => {
                 const data = await response.json();
@@ -286,6 +289,7 @@ const Dashboard: React.FC<{}> = () => {
                     // Handle HTTP error responses
                     setErrorId(data.id || '');
                     setErrorMessage(data.error || `Failed to create SFTP conenction`);
+                    setProgressRemoteModal(false);
                     setShowErrorModal(true);
                     setSftpLoading(false);
                     return;
@@ -297,6 +301,7 @@ const Dashboard: React.FC<{}> = () => {
                 const port = data.port;
 
                 if (port) {
+                    setProgressRemoteMessage('Prepairing...');
                     setProgressRemoteModal(false);
 
                     console.log('Port:', port);
@@ -339,7 +344,7 @@ const Dashboard: React.FC<{}> = () => {
 
 
 
-        // fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/ssh/1', {
+        // fetch('http://monitoring.qimtronics.com:3001/enable-device/ssh/1', {
         //     method: 'POST',
         //     headers: {
         //         'Content-Type': 'application/json',
@@ -369,7 +374,7 @@ const Dashboard: React.FC<{}> = () => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/sftp/0', {
+            fetch('http://monitoring.qimtronics.com:3001/enable-device/sftp/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
@@ -413,7 +418,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchSftpData = async (JSON_MESSAGE: string) => {
         setLoadingFolder(true);
-        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/list-dir', {
+        fetch('http://monitoring.qimtronics.com:3001/sftp/list-dir', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -498,7 +503,7 @@ const Dashboard: React.FC<{}> = () => {
 
         try {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/upload', true);
+            xhr.open('POST', 'http://monitoring.qimtronics.com:3001/sftp/upload', true);
 
             xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
 
@@ -613,7 +618,7 @@ const Dashboard: React.FC<{}> = () => {
         setDownloadController(controller);
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/download', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/download', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -694,7 +699,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/create-dir', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/create-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -754,7 +759,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/delete-dir', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/delete-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -796,7 +801,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/delete-file', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/delete-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -857,7 +862,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp/rename-file', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/rename-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -909,7 +914,7 @@ const Dashboard: React.FC<{}> = () => {
     //         });
 
     //         // Lakukan tindakan dengan data SFTP yang dimasukkan (misalnya, kirim ke server)
-    //         fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/sftp-login', {
+    //         fetch('http://monitoring.qimtronics.com:3001/sftp-login', {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json',
@@ -946,7 +951,7 @@ const Dashboard: React.FC<{}> = () => {
         setProgressRemoteModal(true);
         // mqtt_server_subscribe(serialnumber);
 
-        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/ssh/1', {
+        fetch('http://monitoring.qimtronics.com:3001/enable-device/ssh/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -961,12 +966,13 @@ const Dashboard: React.FC<{}> = () => {
                     // Handle HTTP error responses
                     setErrorId(data.id || '');
                     setErrorMessage(data.error || `Failed to enable SSH connection`);
+                    setProgressRemoteModal(false);
                     setShowErrorModal(true);
                     return;
                 }
 
                 console.log('Success:', data);
-                setProgressRemoteMessage('Device Ready');
+                setProgressRemoteMessage('Device Ready, please wait..');
 
                 // const output = data.output;
                 const port = data.port;
@@ -974,8 +980,10 @@ const Dashboard: React.FC<{}> = () => {
                 if (port) {
                     console.log('Port:', port);
                     setCurrentPort(port);
-                    setShowTerminal(true);
-                    setProgressRemoteModal(false);
+                    setTimeout(() => {
+                        setShowTerminal(true);
+                        setProgressRemoteModal(false);
+                    }, 5000);
                 } else {
                     console.log('Port tidak ditemukan');
                     setErrorId('');
@@ -998,7 +1006,7 @@ const Dashboard: React.FC<{}> = () => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/ssh/0', {
+            fetch('http://monitoring.qimtronics.com:3001/enable-device/ssh/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
@@ -1032,7 +1040,7 @@ const Dashboard: React.FC<{}> = () => {
 
         console.log(JSON.stringify({ datetime, devicename, serialnumber }));
 
-        fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/http/1', {
+        fetch('http://monitoring.qimtronics.com:3001/enable-device/http/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1047,22 +1055,26 @@ const Dashboard: React.FC<{}> = () => {
                     // Handle HTTP error responses
                     setErrorId(data.id || '');
                     setErrorMessage(data.error || `Failed to enable HTTP connection`);
+                    setProgressRemoteModal(false);
                     setShowErrorModal(true);
                     return;
                 }
 
                 console.log('Success:', data);
-                setProgressRemoteMessage('Device Ready...');
+                setProgressRemoteMessage('Device Ready, please wait...');
                 // const output = data.output;
                 const port = data.port;
                 if (port) {
-                    setProgressRemoteModal(false);
-                    console.log('Port:', port);
-                    setCurrentPort(port);
-                    const newUrl = `http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:${port}`;
-                    setCurrentUrl(newUrl); // Update the current URL with the new port
-                    console.log('url:', newUrl);
-                    setShowBrowser(true);
+                    setTimeout(() => {
+                        setProgressRemoteModal(false);
+                        console.log('Port:', port);
+                        setCurrentPort(port);
+                        const newUrl = `http://monitoring.qimtronics.com:${port}`;
+                        setCurrentUrl(newUrl); // Update the current URL with the new port
+                        console.log('url:', newUrl);
+                        setShowBrowser(true);
+                    }, 5000);
+
                 } else {
                     setErrorId('');
                     setErrorMessage(`Failed to enable HTTP connection`);
@@ -1082,7 +1094,7 @@ const Dashboard: React.FC<{}> = () => {
             setShowBrowser(false)
             console.log('Disable device:', serialnumber);
 
-            fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/enable-device/http/0', {
+            fetch('http://monitoring.qimtronics.com:3001/enable-device/http/0', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1102,10 +1114,10 @@ const Dashboard: React.FC<{}> = () => {
         }
     }
 
+    const [isTerminalMinimized, setIsTerminalMinimized] = useState(false); // sudah ada
+
     useEffect(() => {
         if (showTerminal) {
-            // Add this at component level
-
             const terminalElement = document.getElementById('terminal');
             if (terminalElement) {
                 let username: string | undefined;
@@ -1114,17 +1126,45 @@ const Dashboard: React.FC<{}> = () => {
 
                 const terminal = new Terminal({
                     cursorBlink: true,
-                    rows: 20,
-                    cols: 80
+                    rows: 25,
+                    cols: 80,
                 });
-                const fitAddon = new FitAddon();
-                terminal.loadAddon(fitAddon);
-                terminal.open(terminalElement);
-                fitAddon.fit();
-                terminal.write(`Connecting to ${currentDeviceName}...\r\n`);
-                terminal.focus();
 
+                setTimeout(() => {
+                    const dims = (terminal as any)._core._renderService.dimensions;
+                    if (dims) {
+                        const width = dims.actualCellWidth * 80;
+                        const height = dims.actualCellHeight * 25;
+                        const terminalElement = document.getElementById('terminal');
+                        if (terminalElement) {
+                            terminalElement.style.width = `${width}px`;
+                            terminalElement.style.height = `${height}px`;
+                        }
+                    }
+                }, 0);
+
+                // const fitAddon = new FitAddon();
+                // terminal.loadAddon(fitAddon);
+                terminal.open(terminalElement);
+                // fitAddon.fit(); // Scale terminal to fit modal while keeping rows and cols fixed
+                // window.addEventListener('resize', () => {
+                //     fitAddon.fit();
+                // });
+                terminal.focus();
+                terminal.write(`Connecting to ${currentDeviceName}...\r\n`);
+
+
+                // window.addEventListener('resize', () => fitAddon.fit()); // Adjust on window resize
                 terminal.write('Username : ');
+
+                // === ENABLE RIGHT-CLICK PASTE ===
+                terminalElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    navigator.clipboard.readText().then(text => {
+                        terminal.paste(text);
+                    });
+                });
+
                 terminal.onData(data => {
                     if (username === undefined) {
                         if (data === '\r') {
@@ -1144,7 +1184,7 @@ const Dashboard: React.FC<{}> = () => {
                             text = '';
                             terminal.write('\r\n');
                             // terminal.clear();
-                            socketRef.current = new WebSocket(`ws://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001?port=${currentPort}?username=${username}?password=${password}`);
+                            socketRef.current = new WebSocket(`ws://monitoring.qimtronics.com:3001?port=${currentPort}?username=${username}?password=${password}`);
                             socketRef.current.onmessage = (event) => {
                                 if (event.data === 'SSH Connection failed: Incorrect username or password') {
                                     terminal.clear();
@@ -1189,7 +1229,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/data', {
+            const response = await fetch('http://monitoring.qimtronics.com:3001/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1253,13 +1293,22 @@ const Dashboard: React.FC<{}> = () => {
     });
 
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
-    const itemsPerPage = 14;
+    const itemsPerPage = 10;
 
     const handlePaginationChange = ({ detail }: { detail: { currentPageIndex: number } }) => {
         setCurrentPageIndex(detail.currentPageIndex);
     };
 
-    const paginatedItems = sortedDevices.slice(
+    // Tambahkan state untuk teks filter
+    const [filteringText, setFilteringText] = useState("");
+
+    // Filter data perangkat berdasarkan teks filter
+    const filteredDevices = sortedDevices.filter((device) =>
+        device.devicename.toLowerCase().includes(filteringText.toLowerCase())
+    );
+
+    // Gunakan data yang sudah difilter untuk pagination
+    const paginatedItems = filteredDevices.slice(
         (currentPageIndex - 1) * itemsPerPage,
         currentPageIndex * itemsPerPage
     );
@@ -1289,16 +1338,16 @@ const Dashboard: React.FC<{}> = () => {
         },
         ...(companyGroup === 'Owner' ? [
             {
-                id: "reseller_name",
-                header: "Reseller Name",
-                cell: (item: { reseller_name: any; }) => item.reseller_name || "-"
+                id: "tenant",
+                header: "Tenant",
+                cell: (item: { tenant: any; }) => item.tenant || "-"
             }
         ] : []),
         ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
             {
-                id: "customer_name",
-                header: "Customer Name",
-                cell: (item: { customer_name: any; }) => item.customer_name || "-"
+                id: "subtenant",
+                header: "Subtenant",
+                cell: (item: { subtenant: any; }) => item.subtenant || "-"
             },
         ] : []),
         {
@@ -1425,7 +1474,8 @@ const Dashboard: React.FC<{}> = () => {
                     filter={
                         <TextFilter
                             filteringPlaceholder="Find resources"
-                            filteringText=""
+                            filteringText={filteringText}
+                            onChange={({ detail }) => setFilteringText(detail.filteringText)}
                         />
                     }
                     pagination={
@@ -1439,14 +1489,46 @@ const Dashboard: React.FC<{}> = () => {
 
             </div>
             {showTerminal && (
-                <div className="custom-modal">
+                <div
+                    className={`custom-modal ${isTerminalMinimized ? 'minimized' : ''}`}
+                    style={{ display: isTerminalMinimized ? 'none' : '' }}
+                >
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">Terminal {currentDeviceName}</span>
-                            <span className="custom-modal-close" onClick={() => handleTerminalClose(currentUniqueIdDevice, currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
+                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span
+                                    className="custom-icon-minimize"
+                                    onClick={() => setIsTerminalMinimized(true)}
+                                >
+                                    &minus;
+                                </span>
+                                <span
+                                    className="custom-modal-close"
+                                    onClick={() =>
+                                        handleTerminalClose(
+                                            currentUniqueIdDevice,
+                                            currentDateTime,
+                                            currentDeviceName,
+                                            currentSerialNumber,
+                                            currentPort
+                                        )
+                                    }
+                                >
+                                    &times;
+                                </span>
+                            </div>
                         </div>
-                        <div id="terminal" style={{ height: 'calc(100% - 60px)', width: '100%' }}></div>
+                        <div id="terminal-container" style={{ height: 'calc(100% - 60px)' }}>
+                            <div id="terminal"></div>
+                        </div>
                     </div>
+                </div>
+            )}
+            {isTerminalMinimized && (
+                <div className="custom-modal-minimized" onClick={() => setIsTerminalMinimized(false)}>
+                    <span
+                        className="custom-icon-maximize">&#9633;</span> Terminal {currentDeviceName}
                 </div>
             )}
             {showBrowser && (

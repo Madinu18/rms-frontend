@@ -1,10 +1,16 @@
-import { Header, Table, Box, SpaceBetween, TextFilter, Button } from '@cloudscape-design/components';
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable no-empty-pattern */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Header, Table, Box, SpaceBetween, TextFilter, Button, Pagination } from '@cloudscape-design/components';
 import './Device_List.css';
 import { useEffect, useState } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Device_List: React.FC<{}> = ({ }) => {
     const [dataDevice, setDataDevice] = useState<any[]>([]);
+    const [currentPageIndex, setCurrentPageIndex] = useState(1);
+    const [filterText, setFilterText] = useState(''); // State untuk teks filter
+    const itemsPerPage = 18;
 
     const id_user = localStorage.getItem('id_user');
     const id_role = localStorage.getItem('id_role');
@@ -15,7 +21,7 @@ const Device_List: React.FC<{}> = ({ }) => {
 
         const fetchData = async () => {
             try {
-                const response = await fetch('http://ec2-13-212-4-125.ap-southeast-1.compute.amazonaws.com:3001/data', {
+                const response = await fetch('http://monitoring.qimtronics.com:3001/data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -45,9 +51,6 @@ const Device_List: React.FC<{}> = ({ }) => {
         };
     }, []);
 
-
-    console.log(dataDevice);
-
     const sortedDevices = [...dataDevice].sort((a, b) => {
         const nameA = a.devicename.toLowerCase();
         const nameB = b.devicename.toLowerCase();
@@ -60,6 +63,16 @@ const Device_List: React.FC<{}> = ({ }) => {
 
         return 0;
     });
+
+    // Filter data berdasarkan teks filter
+    const filteredDevices = sortedDevices.filter((device) =>
+        device.devicename.toLowerCase().includes(filterText.toLowerCase())
+    );
+
+    const paginatedDevices = filteredDevices.slice(
+        (currentPageIndex - 1) * itemsPerPage,
+        currentPageIndex * itemsPerPage
+    );
 
     const columnDefinitions = [
         {
@@ -94,7 +107,7 @@ const Device_List: React.FC<{}> = ({ }) => {
     ];
 
     return (
-        <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+        <div style={{ padding: '20px', borderRadius: '8px' }}>
             <Table
                 renderAriaLive={({
                     firstIndex,
@@ -105,7 +118,7 @@ const Device_List: React.FC<{}> = ({ }) => {
                 }
                 columnDefinitions={columnDefinitions}
                 enableKeyboardNavigation
-                items={sortedDevices}
+                items={paginatedDevices}
                 loadingText="Loading resources"
                 empty={
                     <Box
@@ -121,16 +134,21 @@ const Device_List: React.FC<{}> = ({ }) => {
                 }
                 filter={
                     <TextFilter
-                        filteringPlaceholder="Find resources"
-                        filteringText=""
+                        filteringPlaceholder="Find resources by Device Name"
+                        filteringText={filterText}
+                        onChange={({ detail }) => setFilterText(detail.filteringText)} // Update teks filter
                     />
                 }
                 header={
                     <Header>Device List</Header>
                 }
-            // pagination={
-            //     <Pagination currentPageIndex={1} pagesCount={1} />
-            // }
+                pagination={
+                    <Pagination
+                        currentPageIndex={currentPageIndex}
+                        pagesCount={Math.ceil(filteredDevices.length / itemsPerPage)}
+                        onChange={({ detail }) => setCurrentPageIndex(detail.currentPageIndex)}
+                    />
+                }
             />
         </div>
     );

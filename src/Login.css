@@ -1,12 +1,19 @@
-body {
+/* body {
   font-family: 'Arial', sans-serif;
   background-color: #a3c5f9;
-  /* background-color: #f0f2f5; */
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   margin: 0;
+} */
+
+.login-page {
+  background-color: #a3c5f9; /* Set background color to blue */
+  height: 100vh; /* Ensure it covers the full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-container {
