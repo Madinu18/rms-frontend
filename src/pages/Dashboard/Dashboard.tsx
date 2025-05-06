@@ -87,11 +87,23 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     const handleHttpsDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        if (showBrowser) {
+            setErrorId('');
+            setErrorMessage('Please close the current window before starting new HTTP session');
+            setShowErrorModal(true);
+            return;
+        }
         setTempHttpParams({ datetime, devicename, serialnumber });
         setShowHttpDurationModal(true);
     };
 
     const handleSftpDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        if (showSftpModal) {
+            setErrorId('');
+            setErrorMessage('Please close the current SFTP before starting new SFTP session');
+            setShowErrorModal(true);
+            return;
+        }
         setTempSftpParams({ datetime, devicename, serialnumber });
         setShowSftpDurationModal(true);
     };
@@ -1115,6 +1127,17 @@ const Dashboard: React.FC<{}> = () => {
     }
 
     const [isTerminalMinimized, setIsTerminalMinimized] = useState(false); // sudah ada
+    const [isBrowserMinimized, setIsBrowserMinimized] = useState(false); // Add state for browser modal minimize
+    const [isSftpMinimized, setIsSftpMinimized] = useState(false); // Add state for SFTP modal minimize
+    const [minimizedModals, setMinimizedModals] = useState<string[]>([]); // Track minimized modals
+
+    const handleMinimize = (modalType: string) => {
+        setMinimizedModals((prev) => [...prev, modalType]);
+    };
+
+    const handleMaximize = (modalType: string) => {
+        setMinimizedModals((prev) => prev.filter((type) => type !== modalType));
+    };
 
     useEffect(() => {
         if (showTerminal) {
@@ -1482,7 +1505,7 @@ const Dashboard: React.FC<{}> = () => {
                         <Pagination
                             currentPageIndex={currentPageIndex}
                             onChange={handlePaginationChange}
-                            pagesCount={Math.ceil(sortedDevices.length / itemsPerPage)}
+                            pagesCount={Math.ceil(filteredDevices.length / itemsPerPage)}
                         />
                     }
                 />
@@ -1493,18 +1516,21 @@ const Dashboard: React.FC<{}> = () => {
                     className={`custom-modal ${isTerminalMinimized ? 'minimized' : ''}`}
                     style={{ display: isTerminalMinimized ? 'none' : '' }}
                 >
-                    <div className="custom-modal-content">
+                    <div className="custom-modal-content-terminal">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">Terminal {currentDeviceName}</span>
                             <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <span
                                     className="custom-icon-minimize"
-                                    onClick={() => setIsTerminalMinimized(true)}
+                                    onClick={() => {
+                                        setIsTerminalMinimized(true);
+                                        handleMinimize('terminal');
+                                    }}
                                 >
                                     &minus;
                                 </span>
                                 <span
-                                    className="custom-modal-close"
+                                    className="custom-icon-close"
                                     onClick={() =>
                                         handleTerminalClose(
                                             currentUniqueIdDevice,
@@ -1526,21 +1552,65 @@ const Dashboard: React.FC<{}> = () => {
                 </div>
             )}
             {isTerminalMinimized && (
-                <div className="custom-modal-minimized" onClick={() => setIsTerminalMinimized(false)}>
-                    <span
-                        className="custom-icon-maximize">&#9633;</span> Terminal {currentDeviceName}
+                <div
+                    className="custom-modal-minimized"
+                    style={{ right: `${minimizedModals.indexOf('terminal') * 350}px` }}
+                    onClick={() => {
+                        setIsTerminalMinimized(false);
+                        handleMaximize('terminal');
+                    }}
+                >
+                    <span className="custom-icon-maximize">&#9633;</span> Terminal {currentDeviceName}
                 </div>
             )}
             {showBrowser && (
-                <div className="custom-modal">
+                <div
+                    className={`custom-modal ${isBrowserMinimized ? 'minimized' : ''}`}
+                    style={{ display: isBrowserMinimized ? 'none' : '' }}
+                >
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">Website {currentDeviceName}</span>
-                            <span className="custom-modal-close" onClick={() => handleHttpClose(currentUniqueIdDevice, currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
+                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span
+                                    className="custom-icon-minimize"
+                                    onClick={() => {
+                                        setIsBrowserMinimized(true);
+                                        handleMinimize('browser');
+                                    }}
+                                >
+                                    &minus;
+                                </span>
+                                <span
+                                    className="custom-icon-close"
+                                    onClick={() =>
+                                        handleHttpClose(
+                                            currentUniqueIdDevice,
+                                            currentDateTime,
+                                            currentDeviceName,
+                                            currentSerialNumber,
+                                            currentPort
+                                        )
+                                    }
+                                >
+                                    &times;
+                                </span>
+                            </div>
                         </div>
                         <iframe src={currentUrl || ''} style={{ height: 'calc(100% - 60px)', width: '100%' }}>test</iframe>
-                        {/* <iframe src="https://asuracomic.net/" style={{ height: 'calc(100% - 60px)', width: '100%' }}>test</iframe> */}
                     </div>
+                </div>
+            )}
+            {isBrowserMinimized && (
+                <div
+                    className="custom-modal-minimized"
+                    style={{ right: `${minimizedModals.indexOf('browser') * 350}px` }}
+                    onClick={() => {
+                        setIsBrowserMinimized(false);
+                        handleMaximize('browser');
+                    }}
+                >
+                    <span className="custom-icon-maximize">&#9633;</span> Website {currentDeviceName}
                 </div>
             )}
             <Modal
@@ -1601,11 +1671,38 @@ const Dashboard: React.FC<{}> = () => {
                 </FormField>
             </Modal>
             {showSftpModal && (
-                <div className="custom-modal">
+                <div
+                    className={`custom-modal ${isSftpMinimized ? 'minimized' : ''}`}
+                    style={{ display: isSftpMinimized ? 'none' : '' }}
+                >
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
                             <span className="custom-modal-title">SFTP</span>
-                            <span className="custom-modal-close" onClick={() => handleSftpClose(currentUniqueIdDevice, currentDateTime, currentDeviceName, currentSerialNumber, currentPort)}>&times;</span>
+                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span
+                                    className="custom-icon-minimize"
+                                    onClick={() => {
+                                        setIsSftpMinimized(true);
+                                        handleMinimize('sftp');
+                                    }}
+                                >
+                                    &minus;
+                                </span>
+                                <span
+                                    className="custom-icon-close"
+                                    onClick={() =>
+                                        handleSftpClose(
+                                            currentUniqueIdDevice,
+                                            currentDateTime,
+                                            currentDeviceName,
+                                            currentSerialNumber,
+                                            currentPort
+                                        )
+                                    }
+                                >
+                                    &times;
+                                </span>
+                            </div>
                         </div>
                         <div className="custom-modal-body" style={{
                             display: 'flex',
@@ -1846,6 +1943,18 @@ const Dashboard: React.FC<{}> = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+            {isSftpMinimized && (
+                <div
+                    className="custom-modal-minimized"
+                    style={{ right: `${minimizedModals.indexOf('sftp') * 350}px` }}
+                    onClick={() => {
+                        setIsSftpMinimized(false);
+                        handleMaximize('sftp');
+                    }}
+                >
+                    <span className="custom-icon-maximize">&#9633;</span> SFTP {currentDeviceName}
                 </div>
             )}
             <Modal

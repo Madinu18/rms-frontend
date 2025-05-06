@@ -17,27 +17,60 @@
     margin: auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 90%; /* Increased width */
-    max-width: 1200px; /* Increased max-width */
-    height: 90%; /* Increased height */
-    max-height: 800px; /* Increased max-height */
+    width: 90%;
+    max-width: 1200px;
+    height: 90%;
+    max-height: 800px;
     position: relative;
+    border-radius: 8px;
+    box-shadow: 0 0 16px black;
+}
+
+.custom-modal-content-terminal {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 800px;
+    height: 90%;
+    max-height: 600px;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 0 16px black;
 }
 
 .custom-modal iframe {
     border: none;
 }
 
-.custom-modal-close {
+.custom-icon-close {
     color: #aaa;
     float: right;
+    padding: 4px 8px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.custom-modal-close:hover,
-.custom-modal-close:focus {
+.custom-icon-minimize{
+    color: #aaa;
+    float: right;
+    padding: 4px 8px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+.custom-icon-close:hover,
+.custom-icon-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.custom-icon-minimize:hover,
+.custom-icon-minimize:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
@@ -54,5 +87,6 @@
 
 .custom-modal-title {
     font-size: 20px;
+    flex-grow: 1;
     font-weight: bold;
 }
