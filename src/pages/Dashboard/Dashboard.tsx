@@ -75,7 +75,38 @@ const Dashboard: React.FC<{}> = () => {
         serialnumber: string;
     } | null>(null);
 
+    const checkSession = (request: string) => {
+        if (request === 'terminal') {
+            if (!showBrowser && !showSftpModal) {
+                setCurrentDeviceName(null);
+                setCurrentSerialNumber(null);
+                setCurrentDateTime(null);
+            }
+        }
+        else if (request === 'browser') {
+            if (!showTerminal && !showSftpModal) {
+                setCurrentDeviceName(null);
+                setCurrentSerialNumber(null);
+                setCurrentDateTime(null);
+            }
+        }
+        else if (request === 'sftp') {
+            if (!showTerminal && !showBrowser) {
+                setCurrentDeviceName(null);
+                setCurrentSerialNumber(null);
+                setCurrentDateTime(null);
+            }
+        }
+    }
+
     const handleSshDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        // console.log('Current device name:', currentDeviceName);
+        if (currentDeviceName !== devicename && currentDeviceName !== null) {
+            setErrorId('');
+            setErrorMessage('Please select same device');
+            setShowErrorModal(true);
+            return;
+        }
         if (showTerminal) {
             setErrorId('');
             setErrorMessage('Please close the current terminal before starting new SSH session');
@@ -87,6 +118,12 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     const handleHttpsDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        if (currentDeviceName !== devicename && currentDeviceName !== null) {
+            setErrorId('');
+            setErrorMessage('Please select same device');
+            setShowErrorModal(true);
+            return;
+        }
         if (showBrowser) {
             setErrorId('');
             setErrorMessage('Please close the current window before starting new HTTP session');
@@ -98,6 +135,12 @@ const Dashboard: React.FC<{}> = () => {
     };
 
     const handleSftpDurationClick = (datetime: string, devicename: string, serialnumber: string) => {
+        if (currentDeviceName !== devicename && currentDeviceName !== null) {
+            setErrorId('');
+            setErrorMessage('Please select same device');
+            setShowErrorModal(true);
+            return;
+        }
         if (showSftpModal) {
             setErrorId('');
             setErrorMessage('Please close the current SFTP before starting new SFTP session');
@@ -304,6 +347,7 @@ const Dashboard: React.FC<{}> = () => {
                     setProgressRemoteModal(false);
                     setShowErrorModal(true);
                     setSftpLoading(false);
+                    checkSession('sftp');
                     return;
                 }
 
@@ -313,6 +357,8 @@ const Dashboard: React.FC<{}> = () => {
                 const port = data.port;
 
                 if (port) {
+                    setSelectedDeviceSerialNumber(serialnumber);
+
                     setProgressRemoteMessage('Prepairing...');
                     setProgressRemoteModal(false);
 
@@ -344,6 +390,7 @@ const Dashboard: React.FC<{}> = () => {
                     setErrorId('');
                     setErrorMessage("Cannot find SFTP port");
                     setShowErrorModal(true);
+                    checkSession('sftp');
                 }
             })
             .catch((error) => {
@@ -352,6 +399,7 @@ const Dashboard: React.FC<{}> = () => {
                 setErrorId('');
                 setErrorMessage("Failed to create SFTP conenction");
                 setShowErrorModal(true);
+                checkSession('sftp');
             });
 
 
@@ -404,6 +452,9 @@ const Dashboard: React.FC<{}> = () => {
                 .catch((error) => {
                     console.error('error:', error);
                 });
+
+            checkSession('sftp');
+            changeSelectedDevice('sftp');
         } else {
             console.log('device id is null');
         }
@@ -980,6 +1031,7 @@ const Dashboard: React.FC<{}> = () => {
                     setErrorMessage(data.error || `Failed to enable SSH connection`);
                     setProgressRemoteModal(false);
                     setShowErrorModal(true);
+                    checkSession('terminal');
                     return;
                 }
 
@@ -993,6 +1045,7 @@ const Dashboard: React.FC<{}> = () => {
                     console.log('Port:', port);
                     setCurrentPort(port);
                     setTimeout(() => {
+                        setSelectedDeviceSerialNumber(serialnumber);
                         setShowTerminal(true);
                         setProgressRemoteModal(false);
                     }, 5000);
@@ -1001,6 +1054,7 @@ const Dashboard: React.FC<{}> = () => {
                     setErrorId('');
                     setErrorMessage(`Failed to enable SSH connection`);
                     setShowErrorModal(true);
+                    checkSession('terminal');
                 }
             })
             .catch((error) => {
@@ -1008,6 +1062,7 @@ const Dashboard: React.FC<{}> = () => {
                 setErrorId('');
                 setErrorMessage(`Failed to enable SSH connection`);
                 setShowErrorModal(true);
+                checkSession('terminal');
             });
         // setShowTerminal(true);
     };
@@ -1030,9 +1085,15 @@ const Dashboard: React.FC<{}> = () => {
                 .then(data => {
                     console.log('success:', data);
                     setShowTerminal(false);
+
+                    checkSession('terminal');
+                    setSelectedDeviceSerialNumber("");
                 })
                 .catch((error) => {
                     console.error('error:', error);
+
+                    checkSession('terminal');
+                    changeSelectedDevice('terminal')
                 });
         } else {
             console.log('device id is null');
@@ -1069,6 +1130,7 @@ const Dashboard: React.FC<{}> = () => {
                     setErrorMessage(data.error || `Failed to enable HTTP connection`);
                     setProgressRemoteModal(false);
                     setShowErrorModal(true);
+                    checkSession('browser');
                     return;
                 }
 
@@ -1078,6 +1140,7 @@ const Dashboard: React.FC<{}> = () => {
                 const port = data.port;
                 if (port) {
                     setTimeout(() => {
+                        setSelectedDeviceSerialNumber(serialnumber);
                         setProgressRemoteModal(false);
                         console.log('Port:', port);
                         setCurrentPort(port);
@@ -1091,6 +1154,7 @@ const Dashboard: React.FC<{}> = () => {
                     setErrorId('');
                     setErrorMessage(`Failed to enable HTTP connection`);
                     setShowErrorModal(true);
+                    checkSession('browser');
                 }
             })
             .catch((error) => {
@@ -1098,6 +1162,7 @@ const Dashboard: React.FC<{}> = () => {
                 setErrorId('');
                 setErrorMessage(`Failed to enable HTTP connection`);
                 setShowErrorModal(true);
+                checkSession('browser');
             });
     };
 
@@ -1121,6 +1186,10 @@ const Dashboard: React.FC<{}> = () => {
                 .catch((error) => {
                     console.error('Error:', error);
                 });
+
+            checkSession('browser');
+            changeSelectedDevice('browser');
+            // setSelectedDeviceSerialNumber("");
         } else {
             console.log('Device ID is null');
         }
@@ -1281,8 +1350,7 @@ const Dashboard: React.FC<{}> = () => {
 
     useEffect(() => {
         fetchData(); // Panggil pertama kali saat komponen mount
-
-        const intervalId = setInterval(fetchData, 10000); // Ambil data setiap 10 detik
+        const intervalId = setInterval(fetchData, 1000); // Ambil data setiap 10 detik
 
         return () => {
             clearInterval(intervalId); // Bersihkan interval ketika komponen unmount
@@ -1322,13 +1390,46 @@ const Dashboard: React.FC<{}> = () => {
         setCurrentPageIndex(detail.currentPageIndex);
     };
 
+    const [selectedDeviceSerialNumber, setSelectedDeviceSerialNumber] = useState("");
+
+    const changeSelectedDevice = (request: string) => {
+        if (request === 'terminal') {
+            if (!showBrowser && !showSftpModal) {
+                setSelectedDeviceSerialNumber("");
+            }
+        }
+        else if (request === 'browser') {
+            if (!showTerminal && !showSftpModal) {
+                setSelectedDeviceSerialNumber("");
+            }
+        }
+        else if (request === 'sftp') {
+            if (!showTerminal && !showBrowser) {
+                setSelectedDeviceSerialNumber("");
+            }
+        }
+    }
+
+    const selectedDevice = sortedDevices.find(
+        (device) => device.serialnumber === selectedDeviceSerialNumber
+    );
+
     // Tambahkan state untuk teks filter
     const [filteringText, setFilteringText] = useState("");
 
-    // Filter data perangkat berdasarkan teks filter
-    const filteredDevices = sortedDevices.filter((device) =>
-        device.devicename.toLowerCase().includes(filteringText.toLowerCase())
+    const otherDevices = sortedDevices.filter(
+        (device) =>
+            device.serialnumber !== selectedDeviceSerialNumber &&
+            device.devicename.toLowerCase().includes(filteringText.toLowerCase())
     );
+
+    // Filter data perangkat berdasarkan teks filter
+    // const filteredDevices = sortedDevices.filter((device) =>
+    //     device.devicename.toLowerCase().includes(filteringText.toLowerCase())
+    // );
+    const filteredDevices = selectedDevice
+        ? [selectedDevice, ...otherDevices]
+        : otherDevices;
 
     // Gunakan data yang sudah difilter untuk pagination
     const paginatedItems = filteredDevices.slice(
@@ -1358,6 +1459,11 @@ const Dashboard: React.FC<{}> = () => {
             id: "device_name",
             header: "Device Name",
             cell: (item: { devicename: any; }) => item.devicename || "-"
+        },
+        {
+            id: "serialnumber",
+            header: "Serial Number",
+            cell: (item: { serialnumber: any; }) => item.serialnumber || "-"
         },
         ...(companyGroup === 'Owner' ? [
             {
@@ -1470,6 +1576,7 @@ const Dashboard: React.FC<{}> = () => {
             </div>
             <div className="dashboard-content">
                 <Table
+
                     renderAriaLive={({
                         firstIndex,
                         lastIndex,
@@ -1478,6 +1585,9 @@ const Dashboard: React.FC<{}> = () => {
                         `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
                     }
                     columnDefinitions={columnDefinitions}
+                    selectionType="single"
+                    trackBy="serialnumber"
+                    selectedItems={selectedDevice ? [selectedDevice] : []}
                     // enableKeyboardNavigation
                     items={paginatedItems}
                     loadingText="Loading resources"
@@ -1554,7 +1664,7 @@ const Dashboard: React.FC<{}> = () => {
             {isTerminalMinimized && (
                 <div
                     className="custom-modal-minimized"
-                    style={{ right: `${minimizedModals.indexOf('terminal') * 350}px` }}
+                    style={{ right: `${minimizedModals.indexOf('terminal') * 350}px`, zIndex: 100 }}
                     onClick={() => {
                         setIsTerminalMinimized(false);
                         handleMaximize('terminal');
@@ -1604,7 +1714,7 @@ const Dashboard: React.FC<{}> = () => {
             {isBrowserMinimized && (
                 <div
                     className="custom-modal-minimized"
-                    style={{ right: `${minimizedModals.indexOf('browser') * 350}px` }}
+                    style={{ right: `${minimizedModals.indexOf('browser') * 350}px`, zIndex: 100 }}
                     onClick={() => {
                         setIsBrowserMinimized(false);
                         handleMaximize('browser');
@@ -1677,7 +1787,7 @@ const Dashboard: React.FC<{}> = () => {
                 >
                     <div className="custom-modal-content">
                         <div className="custom-modal-header">
-                            <span className="custom-modal-title">SFTP</span>
+                            <span className="custom-modal-title">SFTP {currentDeviceName}</span>
                             <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <span
                                     className="custom-icon-minimize"
@@ -1948,7 +2058,7 @@ const Dashboard: React.FC<{}> = () => {
             {isSftpMinimized && (
                 <div
                     className="custom-modal-minimized"
-                    style={{ right: `${minimizedModals.indexOf('sftp') * 350}px` }}
+                    style={{ right: `${minimizedModals.indexOf('sftp') * 350}px`, zIndex: 100 }}
                     onClick={() => {
                         setIsSftpMinimized(false);
                         handleMaximize('sftp');
