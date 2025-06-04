@@ -14,6 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible, onToggleSidebar }) => {
 
   // Ambil role dari localStorage
   const userRole = localStorage.getItem('role_name') || 'Guest';
+  console.log('User Role:', userRole);
   const userGroup = localStorage.getItem('company_group') || 'Guest';
 
   // Fungsi untuk memfilter items berdasarkan role
@@ -35,10 +36,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible, onToggleSidebar }) => {
   const sidebarItems: any[] = [
     {
       type: "section-group",
-      title: "Remote Management",
+      title: "Product Management",
       items: [
-        { type: 'link', text: 'Remote Device', href: '/' },
+        { type: 'link', text: 'Device Control', href: '/' },
         { type: 'link', text: 'Device List', href: '/device_list' },
+        { type: 'link', text: 'Device Report', href: '/device_report' },
       ],
     },
     ...filterItemsByRole(
@@ -109,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible, onToggleSidebar }) => {
           ],
         },
       ],
-      ['Dev', 'Super Admin'] // Hanya Admin & SuperAdmin yang bisa mengakses
+      ['Dev', 'Super Admin', 'User Manager'] // Hanya Admin & SuperAdmin yang bisa mengakses
     ),
   ];
 

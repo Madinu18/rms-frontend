@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-empty-pattern */
-import { Header, Table, Box, SpaceBetween, TextFilter, Button, Pagination } from '@cloudscape-design/components';
+import { Header, Table, Box, SpaceBetween, TextFilter, Pagination } from '@cloudscape-design/components';
 import './Log_History.css';
 import { useEffect, useState } from 'react';
 import { parse, addHours as addHoursToDate, format } from 'date-fns';
@@ -19,6 +19,8 @@ const parseDate = (str: string): Date => {
 };
 
 const Log_History: React.FC<{}> = ({ }) => {
+    const [loading, setLoading] = useState(true);
+
     const [dataLog, setDataLog] = useState<any[]>([]);
     const [filteredDataLog, setFilteredDataLog] = useState<any[]>([]); // State untuk data yang difilter
     const [filteringText, setFilteringText] = useState(""); // State untuk teks filter
@@ -30,7 +32,7 @@ const Log_History: React.FC<{}> = ({ }) => {
 
         const fetchData = async () => {
             try {
-                const response = await fetch('http://monitoring.qimtronics.com:3001/log-history', {
+                const response = await fetch('https://monitoring.qimtronics.com:3001/log-history', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -50,6 +52,10 @@ const Log_History: React.FC<{}> = ({ }) => {
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
@@ -126,6 +132,7 @@ const Log_History: React.FC<{}> = ({ }) => {
                 ]}
                 enableKeyboardNavigation
                 items={paginatedItems}
+                loading={loading}
                 loadingText="Loading resources"
                 empty={
                     <Box
@@ -135,7 +142,7 @@ const Log_History: React.FC<{}> = ({ }) => {
                     >
                         <SpaceBetween size="m">
                             <b>No resources</b>
-                            <Button>Create resource</Button>
+
                         </SpaceBetween>
                     </Box>
                 }
@@ -143,7 +150,10 @@ const Log_History: React.FC<{}> = ({ }) => {
                     <TextFilter
                         filteringPlaceholder="Find by Device Name"
                         filteringText={filteringText}
-                        onChange={({ detail }) => setFilteringText(detail.filteringText)} // Update teks filter
+                        onChange={({ detail }) => {
+                            setFilteringText(detail.filteringText);
+                            setCurrentPageIndex(1);
+                        }}
                     />
                 }
                 header={

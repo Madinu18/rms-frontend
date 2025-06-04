@@ -13,6 +13,8 @@ const List_Company: React.FC<{}> = () => {
     const idUser = localStorage.getItem('id_user');
     const idRole = localStorage.getItem('id_role');
 
+    const [loading, setLoading] = useState(true);
+
     const [dataCompany, setDataCompany] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<any[]>([]);
     const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
@@ -59,7 +61,7 @@ const List_Company: React.FC<{}> = () => {
             created_by: idUser
         });
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/company', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/company', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,6 +79,8 @@ const List_Company: React.FC<{}> = () => {
             console.error('Error fetching data:', error);
             setErrorModalMessage(String(error));
             setIsErrorModalVisible(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -117,7 +121,7 @@ const List_Company: React.FC<{}> = () => {
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
 
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/company/delete', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/company/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,7 +169,7 @@ const List_Company: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/company/update', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/company/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -232,12 +236,12 @@ const List_Company: React.FC<{}> = () => {
                     ]}
                     enableKeyboardNavigation
                     items={filteredData}
+                    loading={loading}
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
                             <SpaceBetween size="m">
                                 <b>No resources</b>
-                                <Button>Create resource</Button>
                             </SpaceBetween>
                         </Box>
                     }

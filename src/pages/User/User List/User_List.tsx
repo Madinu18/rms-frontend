@@ -11,6 +11,8 @@ import { useFlashbar } from '../../../context/FlashbarContext';
 import { SharedFlashbar } from '../../../components/Flashbar/Flashbar';
 
 const User_List: React.FC<{}> = () => {
+    const [loading, setLoading] = useState(true);
+
     const [dataUser, setDataUser] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<any[]>([]);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -67,7 +69,7 @@ const User_List: React.FC<{}> = () => {
                 id_company: idCompany
             });
             console.log('JSON_MESSAGE:', JSON_MESSAGE);
-            const response = await fetch('http://monitoring.qimtronics.com:3001/user', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,6 +87,8 @@ const User_List: React.FC<{}> = () => {
             console.error('Error fetching data:', error);
             setErrorModalMessage(String(error));
             setIsErrorModalVisible(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -111,7 +115,7 @@ const User_List: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/user/delete', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/user/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -170,7 +174,7 @@ const User_List: React.FC<{}> = () => {
                 new_password: resetPasswordData.newPassword
             });
             console.log('Reset password payload:', JSON_MESSAGE);
-            const response = await fetch('http://monitoring.qimtronics.com:3001/user/reset-password', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/user/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -241,12 +245,12 @@ const User_List: React.FC<{}> = () => {
                     ]}
                     enableKeyboardNavigation
                     items={filteredDataUser}
+                    loading={loading}
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
                             <SpaceBetween size="m">
                                 <b>No resources</b>
-                                <Button>Create resource</Button>
                             </SpaceBetween>
                         </Box>
                     }

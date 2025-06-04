@@ -2,7 +2,7 @@
 /* eslint-disable no-empty-pattern */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Header, Table, Box, SpaceBetween, TextFilter, Button, Pagination } from '@cloudscape-design/components';
+import { Header, Table, Box, SpaceBetween, TextFilter, Pagination } from '@cloudscape-design/components';
 import './Device_List.css';
 import { useEffect, useState } from 'react';
 
@@ -10,6 +10,7 @@ const Device_List: React.FC<{}> = ({ }) => {
     const [dataDevice, setDataDevice] = useState<any[]>([]);
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
     const [filterText, setFilterText] = useState(''); // State untuk teks filter
+    const [loading, setLoading] = useState(true);
     const itemsPerPage = 18;
 
     const id_user = localStorage.getItem('id_user');
@@ -21,7 +22,7 @@ const Device_List: React.FC<{}> = ({ }) => {
 
         const fetchData = async () => {
             try {
-                const response = await fetch('http://monitoring.qimtronics.com:3001/data', {
+                const response = await fetch('https://monitoring.qimtronics.com:3001/data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -38,6 +39,10 @@ const Device_List: React.FC<{}> = ({ }) => {
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
@@ -99,6 +104,22 @@ const Device_List: React.FC<{}> = ({ }) => {
                 cell: (item: { customer_name: any; }) => item.customer_name || "-"
             },
         ] : []),
+        ...(companyGroup === 'Owner' ? [
+            {
+                id: "tenant",
+                header: "Tenant",
+                sortingField: "tenant",
+                cell: (item: { tenant: any; }) => item.tenant || "-"
+            }
+        ] : []),
+        ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
+            {
+                id: "subtenant",
+                header: "Subtenant",
+                sortingField: "subtenant",
+                cell: (item: { subtenant: any; }) => item.subtenant || "-"
+            },
+        ] : []),
         {
             id: "last_seen",
             header: "Last Seen",
@@ -119,6 +140,7 @@ const Device_List: React.FC<{}> = ({ }) => {
                 columnDefinitions={columnDefinitions}
                 enableKeyboardNavigation
                 items={paginatedDevices}
+                loading={loading}
                 loadingText="Loading resources"
                 empty={
                     <Box
@@ -128,7 +150,6 @@ const Device_List: React.FC<{}> = ({ }) => {
                     >
                         <SpaceBetween size="m">
                             <b>No resources</b>
-                            <Button>Create resource</Button>
                         </SpaceBetween>
                     </Box>
                 }
@@ -136,7 +157,10 @@ const Device_List: React.FC<{}> = ({ }) => {
                     <TextFilter
                         filteringPlaceholder="Find resources by Device Name"
                         filteringText={filterText}
-                        onChange={({ detail }) => setFilterText(detail.filteringText)} // Update teks filter
+                        onChange={({ detail }) => {
+                            setFilterText(detail.filteringText);
+                            setCurrentPageIndex(1);
+                        }}
                     />
                 }
                 header={

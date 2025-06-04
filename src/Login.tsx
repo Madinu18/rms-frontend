@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import React, { useState } from 'react';
-import './Login.css'; // Import the CSS file for styling
-import qimtronics_login from './assets/qimtronics_background.jpg';
+import './Login.css';
+// import qimtronics_login from './assets/qimtronics_background.jpg';
 
 
 const Login = ({ onLogin }: { onLogin: () => void }) => {
@@ -26,7 +26,7 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
     });
 
     try {
-      const response = await fetch('http://monitoring.qimtronics.com:3001/login', {
+      const response = await fetch('https://monitoring.qimtronics.com:3001/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -86,11 +86,26 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
   return (
     <div className='login-page'>
       <div className="login-container">
-        <div className="login-header">
-          <img src={qimtronics_login} alt="logo" className="qimstronics-login-image" />
-          <h1 className="app-title">Remote System Management</h1>
+        {/* Cloudscape-style logo/title */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{
+            display: 'inline-block',
+            background: 'linear-gradient(90deg, #0972d3 0%, #035388 100%)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 28,
+            borderRadius: 10,
+            padding: '10px 32px',
+            letterSpacing: 1,
+            boxShadow: '0 2px 8px 0 rgba(9, 114, 211, 0.08)',
+            marginBottom: 10
+          }}>
+            Product Support System
+          </span>
+          {/* <h1 className="app-title" style={{ margin: 0, fontSize: 22, fontWeight: 500, color: '#202840', letterSpacing: 0.5 }}>
+            Remote System Management
+          </h1> */}
         </div>
-        <div className="separator"></div>
         <div className="login-box">
           <form onSubmit={handleSubmit} className="login-form">
             <h2 className="login-title">Login</h2>
@@ -112,6 +127,16 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
 
             <button type="submit" className="login-button">Login</button>
           </form>
+        </div>
+        <div style={{
+          width: '100%',
+          textAlign: 'center',
+          marginTop: 30,
+          color: '#b0b7c3',
+          fontSize: 13,
+          letterSpacing: 0.2
+        }}>
+          <span>@Powered by Qimtronics</span>
         </div>
       </div>
     </div>

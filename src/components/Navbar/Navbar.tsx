@@ -37,11 +37,12 @@ const Navbar: React.FC<NavbarProps> = ({ signOut, user }) => {
       <TopNavigation
         identity={{
           href: "#",
-          title: "QIMTRONICS | Remote Management System",
-          logo: {
-            src: "/qimtronics_logo.png",
-            alt: "qimtronics"
-          }
+          // title: "QIMTRONICS | Remote Management System",
+          title: "PSS | Product Support System",
+          // logo: {
+          //   src: "/qimtronics_logo.png",
+          //   alt: "qimtronics"
+          // }
         }}
         utilities={[
           {
@@ -50,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ signOut, user }) => {
             iconName: "user-profile",
             onItemClick: handleItemClick,
             items: [
-              { id: "profile", text: "Profile" },
+              // { id: "profile", text: "Profile" },
               // { id: "security", text: "Security" },
               { id: "signout", text: "Sign out" },
             ]

@@ -9,6 +9,7 @@ import Sidebar from './components/Sidebar/Sidebar';
 
 import Dashboard from "./pages/Dashboard/Dashboard";
 import DeviceList from "./pages/Device List/Device_List";
+import DeviceReport from "./pages/Device Report/Device_Report";
 import CompanyList from "./pages/Company/Company List/Company_List";
 import CreateCompany from "./pages/Company/Create Company/Create_Company";
 import CompanyDetails from "./pages/Company/Company Details/Company_Details";
@@ -16,6 +17,7 @@ import UserList from "./pages/User/User List/User_List";
 import CreateUser from "./pages/User/Create User/Create_User";
 import DeviceManager from "./pages/Device/Device Manager/Device_Manager";
 import LogHistory from "./pages/Log History/Log_History";
+import NodeDevice from "./pages/NodeDevice/NodeDevice";
 
 import ProtectedRoute from "./props/ProtectedRouteProps";
 
@@ -69,6 +71,7 @@ const App: React.FC<AppProps> = ({ signOut }) => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/device_list" element={<DeviceList />} />
+            <Route path="/device_report" element={<DeviceReport />} />
             <Route path="/company" element={<CompanyList />} />
             {/* <Route path="/company/create" element={<CreateCompany />} /> */}
             <Route
@@ -107,6 +110,10 @@ const App: React.FC<AppProps> = ({ signOut }) => {
                 <LogHistory />
               </ProtectedRoute>
             }
+            />
+            <Route
+              path="/node-device/:serialnumber"
+              element={<NodeDevice />}
             />
 
             {/* <Route path="/" element={<Dashboard data_transaksi_pengeluaran={transactions_pengeluaran} data_transaksi_transfer={transactions_transfer} />} />

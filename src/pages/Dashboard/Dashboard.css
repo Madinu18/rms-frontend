@@ -276,4 +276,40 @@
     border: 1px solid #ccc;
 }
 
-  
+
+/* Responsive styles for dashboard summary cards */
+@media (max-width: 1100px) {
+  .dashboard-left, .dashboard-center, .dashboard-right {
+    max-width: 30%;
+    height: 120px;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-content {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+  }
+  .dashboard-left, .dashboard-center, .dashboard-right {
+    max-width: 100%;
+    width: 100%;
+    height: 100px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-content {
+    gap: 12px;
+    padding: 0 4px;
+  }
+  .dashboard-left, .dashboard-center, .dashboard-right {
+    height: auto;
+    min-height: 80px;
+    padding: 0;
+  }
+  .online-count, .offline-count, .total-count {
+    font-size: 2.2em;
+  }
+}
+

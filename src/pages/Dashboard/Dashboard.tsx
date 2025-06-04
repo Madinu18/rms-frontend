@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Button, Container, FormField, Header, Input, Modal, SpaceBetween, Table, TextFilter, ProgressBar, Pagination } from '@cloudscape-design/components';
+import { Link } from "react-router-dom";
 import { Terminal } from 'xterm';
 // import { FitAddon } from 'xterm-addon-fit';
 // import mqtt, { MqttClient } from "mqtt";
@@ -330,7 +331,7 @@ const Dashboard: React.FC<{}> = () => {
         setProgressRemoteMessage('Prepairing...');
         setProgressRemoteModal(true);
 
-        fetch('http://monitoring.qimtronics.com:3001/enable-device/sftp/1', {
+        fetch('https://monitoring.qimtronics.com:3001/enable-device/sftp/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -404,7 +405,7 @@ const Dashboard: React.FC<{}> = () => {
 
 
 
-        // fetch('http://monitoring.qimtronics.com:3001/enable-device/ssh/1', {
+        // fetch('https://monitoring.qimtronics.com:3001/enable-device/ssh/1', {
         //     method: 'POST',
         //     headers: {
         //         'Content-Type': 'application/json',
@@ -434,7 +435,7 @@ const Dashboard: React.FC<{}> = () => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://monitoring.qimtronics.com:3001/enable-device/sftp/0', {
+            fetch('https://monitoring.qimtronics.com:3001/enable-device/sftp/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
@@ -481,7 +482,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchSftpData = async (JSON_MESSAGE: string) => {
         setLoadingFolder(true);
-        fetch('http://monitoring.qimtronics.com:3001/sftp/list-dir', {
+        fetch('https://monitoring.qimtronics.com:3001/sftp/list-dir', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -566,7 +567,7 @@ const Dashboard: React.FC<{}> = () => {
 
         try {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://monitoring.qimtronics.com:3001/sftp/upload', true);
+            xhr.open('POST', 'https://monitoring.qimtronics.com:3001/sftp/upload', true);
 
             xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
 
@@ -681,7 +682,7 @@ const Dashboard: React.FC<{}> = () => {
         setDownloadController(controller);
 
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/download', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/sftp/download', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -762,7 +763,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/create-dir', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/sftp/create-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -822,7 +823,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/delete-dir', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/sftp/delete-dir', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -864,7 +865,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/delete-file', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/sftp/delete-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -925,7 +926,7 @@ const Dashboard: React.FC<{}> = () => {
         });
 
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/sftp/rename-file', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/sftp/rename-file', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -977,7 +978,7 @@ const Dashboard: React.FC<{}> = () => {
     //         });
 
     //         // Lakukan tindakan dengan data SFTP yang dimasukkan (misalnya, kirim ke server)
-    //         fetch('http://monitoring.qimtronics.com:3001/sftp-login', {
+    //         fetch('https://monitoring.qimtronics.com:3001/sftp-login', {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json',
@@ -1014,7 +1015,7 @@ const Dashboard: React.FC<{}> = () => {
         setProgressRemoteModal(true);
         // mqtt_server_subscribe(serialnumber);
 
-        fetch('http://monitoring.qimtronics.com:3001/enable-device/ssh/1', {
+        fetch('https://monitoring.qimtronics.com:3001/enable-device/ssh/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1073,7 +1074,7 @@ const Dashboard: React.FC<{}> = () => {
         if (datetime && devicename && serialnumber && port) {
             console.log('disable device:', serialnumber);
 
-            fetch('http://monitoring.qimtronics.com:3001/enable-device/ssh/0', {
+            fetch('https://monitoring.qimtronics.com:3001/enable-device/ssh/0', {
                 method: 'post',
                 headers: {
                     'content-type': 'application/json',
@@ -1113,7 +1114,7 @@ const Dashboard: React.FC<{}> = () => {
 
         console.log(JSON.stringify({ datetime, devicename, serialnumber }));
 
-        fetch('http://monitoring.qimtronics.com:3001/enable-device/http/1', {
+        fetch('https://monitoring.qimtronics.com:3001/enable-device/http/1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1144,7 +1145,7 @@ const Dashboard: React.FC<{}> = () => {
                         setProgressRemoteModal(false);
                         console.log('Port:', port);
                         setCurrentPort(port);
-                        const newUrl = `http://monitoring.qimtronics.com:${port}`;
+                        const newUrl = `https://monitoring.qimtronics.com:${port}`;
                         setCurrentUrl(newUrl); // Update the current URL with the new port
                         console.log('url:', newUrl);
                         setShowBrowser(true);
@@ -1171,7 +1172,7 @@ const Dashboard: React.FC<{}> = () => {
             setShowBrowser(false)
             console.log('Disable device:', serialnumber);
 
-            fetch('http://monitoring.qimtronics.com:3001/enable-device/http/0', {
+            fetch('https://monitoring.qimtronics.com:3001/enable-device/http/0', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1276,7 +1277,7 @@ const Dashboard: React.FC<{}> = () => {
                             text = '';
                             terminal.write('\r\n');
                             // terminal.clear();
-                            socketRef.current = new WebSocket(`ws://monitoring.qimtronics.com:3001?port=${currentPort}?username=${username}?password=${password}`);
+                            socketRef.current = new WebSocket(`wss://monitoring.qimtronics.com:3001?port=${currentPort}?username=${username}?password=${password}`);
                             socketRef.current.onmessage = (event) => {
                                 if (event.data === 'SSH Connection failed: Incorrect username or password') {
                                     terminal.clear();
@@ -1321,7 +1322,7 @@ const Dashboard: React.FC<{}> = () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/data', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1334,6 +1335,8 @@ const Dashboard: React.FC<{}> = () => {
             }
             const json = await response.json();
             setDataDevice(json.data);
+
+            console.log(json.data);
 
             // Hitung status online, offline, dan total setelah data diterima
             const online = json.data.filter((device: { status: number; }) => device.status === 1).length;
@@ -1348,40 +1351,87 @@ const Dashboard: React.FC<{}> = () => {
         }
     };
 
-    useEffect(() => {
-        fetchData(); // Panggil pertama kali saat komponen mount
-        const intervalId = setInterval(fetchData, 1000); // Ambil data setiap 10 detik
+    const [isLoading, setIsLoading] = useState(true);
 
-        return () => {
-            clearInterval(intervalId); // Bersihkan interval ketika komponen unmount
-        };
+    useEffect(() => {
+        setIsLoading(true);
+        fetchData().finally(() => setIsLoading(false));
     }, []); // Kosongkan array dependensi agar effect hanya dijalankan sekali saat mount
 
 
-    const sortedDevices = [...dataDevice].sort((a, b) => {
-        // Urutkan berdasarkan status (status 1 di atas)
-        if (a.status === 1 && b.status !== 1) {
-            return -1; // A lebih tinggi (status 1) dari B (status 0)
-        }
-        if (a.status !== 1 && b.status === 1) {
-            return 1; // B lebih tinggi (status 1) dari A (status 0)
-        }
+    const [sortingColumn, setSortingColumn] = useState<any>(null);
+    const [sortingDescending, setSortingDescending] = useState(false);
 
-        // Jika status sama, urutkan berdasarkan deviceName secara alfabetis (A-Z)
-        const nameA = a.devicename.toLowerCase();
-        const nameB = b.devicename.toLowerCase();
-        if (nameA < nameB) {
-            return -1; // A lebih kecil dari B
-        }
-        if (nameA > nameB) {
-            return 1; // A lebih besar dari B
-        }
+    const handleSortingChange = (event: any) => {
+        setSortingColumn(event.detail.sortingColumn);
+        setSortingDescending(event.detail.isDescending);
+    };
 
-        // Jika deviceName sama, urutkan berdasarkan lastSeen (terbaru di atas)
-        const dateA = new Date(a.datetime);
-        const dateB = new Date(b.datetime);
-        return dateB.getTime() - dateA.getTime(); // Urutkan berdasarkan tanggal (terbaru di atas)
-    });
+    const sortedDevices = React.useMemo(() => {
+        let sorted = [...dataDevice];
+        if (sortingColumn && sortingColumn.sortingField === 'status') {
+            sorted.sort((a, b) => {
+                if (sortingDescending) {
+                    return b.status - a.status;
+                } else {
+                    return a.status - b.status;
+                }
+            });
+        }
+        if (sortingColumn && sortingColumn.sortingField === 'devicename') {
+            sorted.sort((a, b) => {
+                if (sortingDescending) {
+                    return b.devicename.localeCompare(a.devicename);
+                } else {
+                    return a.devicename.localeCompare(b.devicename);
+                }
+            });
+        }
+        if (sortingColumn && sortingColumn.sortingField === 'serialnumber') {
+            sorted.sort((a, b) => {
+                if (sortingDescending) {
+                    return b.serialnumber.localeCompare(a.serialnumber);
+                } else {
+                    return a.serialnumber.localeCompare(b.serialnumber);
+                }
+            });
+        }
+        if (sortingColumn && sortingColumn.sortingField === 'tenant') {
+            sorted.sort((a, b) => {
+                const aTenant = a.tenant || '';
+                const bTenant = b.tenant || '';
+                if (sortingDescending) {
+                    return bTenant.localeCompare(aTenant);
+                } else {
+                    return aTenant.localeCompare(bTenant);
+                }
+            });
+        }
+        if (sortingColumn && sortingColumn.sortingField === 'subtenant') {
+            sorted.sort((a, b) => {
+                const aSubtenant = a.subtenant || '';
+                const bSubtenant = b.subtenant || '';
+                if (sortingDescending) {
+                    return bSubtenant.localeCompare(aSubtenant);
+                } else {
+                    return aSubtenant.localeCompare(bSubtenant);
+                }
+            });
+        }
+        if (sortingColumn && sortingColumn.sortingField === 'datetime') {
+            sorted.sort((a, b) => {
+                const aTime = a.datetime ? new Date(a.datetime).getTime() : 0;
+                const bTime = b.datetime ? new Date(b.datetime).getTime() : 0;
+                if (sortingDescending) {
+                    return bTime - aTime;
+                } else {
+                    return aTime - bTime;
+                }
+            });
+        }
+        // ...add more sorting fields if needed...
+        return sorted;
+    }, [dataDevice, sortingColumn, sortingDescending]);
 
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
     const itemsPerPage = 10;
@@ -1441,6 +1491,7 @@ const Dashboard: React.FC<{}> = () => {
         {
             id: "status",
             header: "Status",
+            sortingField: "status",
             cell: (item: { status: number; }) => (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span
@@ -1456,15 +1507,42 @@ const Dashboard: React.FC<{}> = () => {
             ),
         },
         {
-            id: "device_name",
+            id: "devicename",
             header: "Device Name",
-            cell: (item: { devicename: any; }) => item.devicename || "-"
+            sortingField: "devicename",
+            cell: (item: { devicename: any; device_type?: string; serialnumber?: string }) =>
+                item.device_type === "RMS-QIMS-HUB" ? (
+                    <Link to={`/node-device/${item.serialnumber}`}>{item.devicename}</Link>
+                ) : (
+                    item.devicename || "-"
+                )
         },
-        {
-            id: "serialnumber",
-            header: "Serial Number",
-            cell: (item: { serialnumber: any; }) => item.serialnumber || "-"
-        },
+        ...(companyGroup === 'Owner' ? [
+            {
+                id: "serialnumber",
+                header: "Serial Number",
+                sortingField: "serialnumber",
+                cell: (item: { serialnumber: any; }) => item.serialnumber || "-"
+            },
+        ] : []),
+        // {
+        //     id: "device_type",
+        //     header: "Device Type",
+        //     // sortingField: "device_type",
+        //     cell: (item: { device_type: any; }) => item.device_type === "RMS-QIMS-HUB" ? "HUB" : item.device_type === "RMS-QIMS-DEVICE" ? "EDGE" : "-"
+        // },
+        // {
+        //     id: "company",
+        //     header: "Company",
+        //     cell: (item: { company: any; }) => item.company || "-"
+        // },
+        ...(companyGroup === 'Reseller' ? [
+            {
+                id: "company",
+                header: "Company",
+                cell: (item: { customer_name: any; }) => item.customer_name || "-"
+            },
+        ] : []),
         ...(companyGroup === 'Owner' ? [
             {
                 id: "tenant",
@@ -1528,8 +1606,9 @@ const Dashboard: React.FC<{}> = () => {
             )
         },
         {
-            id: "last_seen",
-            header: "Last Seen",
+            id: "datetime",
+            header: "Last Seen (UTC+0)",
+            sortingField: "datetime",
             cell: (item: { datetime: any; }) => item.datetime || "-"
         }
     ];
@@ -1543,10 +1622,22 @@ const Dashboard: React.FC<{}> = () => {
                         header={
                             <Header variant="h2" description="Total Online">
                                 Online Devices
+                                {!isLoading && (
+                                    <span style={{ fontSize: 14, color: '#757575', marginLeft: 8 }}>
+                                        {totalDevices > 0 ? `(${((onlineDevices / totalDevices) * 100).toFixed(1)}%)` : '(0%)'}
+                                    </span>
+                                )}
                             </Header>
                         }
                     >
-                        <div className="online-count">{onlineDevices}</div>
+                        {isLoading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 50, }}>
+                                <CircularProgress size={20} sx={{ color: '#757575' }} />
+                                <span style={{ marginLeft: 10, fontSize: 13, color: '#757575' }}>Loading Online Devices...</span>
+                            </div>
+                        ) : (
+                            <div className="online-count">{onlineDevices}</div>
+                        )}
                     </Container>
                 </div>
                 <div className="dashboard-center">
@@ -1555,10 +1646,22 @@ const Dashboard: React.FC<{}> = () => {
                         header={
                             <Header variant="h2" description="Total Offline">
                                 Offline Devices
+                                {!isLoading && (
+                                    <span style={{ fontSize: 14, color: '#757575', marginLeft: 8 }}>
+                                        {totalDevices > 0 ? `(${((offlineDevices / totalDevices) * 100).toFixed(1)}%)` : '(0%)'}
+                                    </span>
+                                )}
                             </Header>
                         }
                     >
-                        <div className="offline-count">{offlineDevices}</div>
+                        {isLoading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 50 }}>
+                                <CircularProgress size={20} sx={{ color: '#757575' }} />
+                                <span style={{ marginLeft: 10, fontSize: 13, color: '#757575' }}>Loading Offline Devices...</span>
+                            </div>
+                        ) : (
+                            <div className="offline-count">{offlineDevices}</div>
+                        )}
                     </Container>
                 </div>
                 <div className="dashboard-right">
@@ -1570,13 +1673,19 @@ const Dashboard: React.FC<{}> = () => {
                             </Header>
                         }
                     >
-                        <div className="total-count">{totalDevices}</div>
+                        {isLoading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 50 }}>
+                                <CircularProgress size={20} sx={{ color: '#757575' }} />
+                                <span style={{ marginLeft: 10, fontSize: 13, color: '#757575' }}>Loading Total Devices...</span>
+                            </div>
+                        ) : (
+                            <div className="total-count">{totalDevices}</div>
+                        )}
                     </Container>
                 </div>
             </div>
             <div className="dashboard-content">
                 <Table
-
                     renderAriaLive={({
                         firstIndex,
                         lastIndex,
@@ -1590,8 +1699,8 @@ const Dashboard: React.FC<{}> = () => {
                     selectedItems={selectedDevice ? [selectedDevice] : []}
                     // enableKeyboardNavigation
                     items={paginatedItems}
+                    loading={isLoading}
                     loadingText="Loading resources"
-
                     empty={
                         <Box
                             margin={{ vertical: "xs" }}
@@ -1600,15 +1709,17 @@ const Dashboard: React.FC<{}> = () => {
                         >
                             <SpaceBetween size="m">
                                 <b>No resources</b>
-                                <Button>Create resource</Button>
                             </SpaceBetween>
                         </Box>
                     }
                     filter={
                         <TextFilter
-                            filteringPlaceholder="Find resources"
+                            filteringPlaceholder="Find by Device Name"
                             filteringText={filteringText}
-                            onChange={({ detail }) => setFilteringText(detail.filteringText)}
+                            onChange={({ detail }) => {
+                                setFilteringText(detail.filteringText);
+                                setCurrentPageIndex(1);
+                            }}
                         />
                     }
                     pagination={
@@ -1618,8 +1729,10 @@ const Dashboard: React.FC<{}> = () => {
                             pagesCount={Math.ceil(filteredDevices.length / itemsPerPage)}
                         />
                     }
+                    sortingColumn={sortingColumn}
+                    sortingDescending={sortingDescending}
+                    onSortingChange={handleSortingChange}
                 />
-
             </div>
             {showTerminal && (
                 <div

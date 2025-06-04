@@ -10,6 +10,7 @@ import { SharedFlashbar } from '../../../components/Flashbar/Flashbar';
 
 
 const Device_Manager: React.FC<{}> = () => {
+    const [loading, setLoading] = useState(true);
     const [dataUser, setDataUser] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<any[]>([]);
 
@@ -64,7 +65,7 @@ const Device_Manager: React.FC<{}> = () => {
                 id_company: idCompany
             });
             console.log('JSON_MESSAGE:', JSON_MESSAGE);
-            const response = await fetch('http://monitoring.qimtronics.com:3001/device-manager', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/device-manager', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -82,6 +83,8 @@ const Device_Manager: React.FC<{}> = () => {
             console.error('Error fetching data:', error);
             setErrorModalMessage(String(error));
             setIsErrorModalVisible(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -91,7 +94,7 @@ const Device_Manager: React.FC<{}> = () => {
             id_user: idUserLogin
         })
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/devices', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/devices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,6 +116,8 @@ const Device_Manager: React.FC<{}> = () => {
             console.error('Error fetching data:', error);
             setErrorModalMessage(String(error));
             setIsErrorModalVisible(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -159,7 +164,7 @@ const Device_Manager: React.FC<{}> = () => {
         });
         console.log('JSON_MESSAGE:', JSON_MESSAGE);
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/devices-manager/list', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/devices-manager/list', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -220,7 +225,7 @@ const Device_Manager: React.FC<{}> = () => {
 
     const updateAccesibleDevice = async (JSON_MESSAGE: string) => {
         try {
-            const response = await fetch('http://monitoring.qimtronics.com:3001/devices-manager/user/update-device', {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/devices-manager/user/update-device', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -285,12 +290,12 @@ const Device_Manager: React.FC<{}> = () => {
                     ]}
                     enableKeyboardNavigation
                     items={filteredDataUser} // Gunakan data yang sudah difilter
+                    loading={loading}
                     loadingText="Loading resources"
                     empty={
                         <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
                             <SpaceBetween size="m">
                                 <b>No resources</b>
-                                <Button>Create resource</Button>
                             </SpaceBetween>
                         </Box>
                     }
@@ -374,12 +379,12 @@ const Device_Manager: React.FC<{}> = () => {
                                 ]}
                                 enableKeyboardNavigation
                                 items={deviceList}
+                                loading={loading}
                                 loadingText="Loading resources"
                                 empty={
                                     <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
                                         <SpaceBetween size="m">
                                             <b>No resources</b>
-                                            <Button>Create resource</Button>
                                         </SpaceBetween>
                                     </Box>
                                 }
