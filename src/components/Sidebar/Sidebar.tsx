@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible, onToggleSidebar }) => {
       items: [
         { type: 'link', text: 'Device Control', href: '/' },
         { type: 'link', text: 'Device List', href: '/device_list' },
-        { type: 'link', text: 'Device Report', href: '/device_report' },
+        { type: 'link', text: 'Device Connection Report', href: '/device_report' },
       ],
     },
     ...filterItemsByRole(

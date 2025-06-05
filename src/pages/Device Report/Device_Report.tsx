@@ -1,3 +1,4 @@
+import React from 'react';
 import { Header, Table, Box, SpaceBetween, TextFilter, Pagination } from '@cloudscape-design/components';
 import './Device_Report.css';
 import { useEffect, useState } from 'react';
@@ -11,7 +12,79 @@ const Device_Report: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
     const [filterText, setFilterText] = useState('');
+    const [sortingColumn, setSortingColumn] = useState<any>(null);
+    const [isDescending, setIsDescending] = useState(false);
     const itemsPerPage = 18;
+
+    const userRole = localStorage.getItem('role_name') || 'Guest';
+
+    const getPercent = (count: number) => ((count / 1440) * 100).toFixed(1);
+    const getLivePercent = (count: number) => {
+        const now = new Date();
+        const minutesPassed = now.getHours() * 60 + now.getMinutes();
+        // Hindari pembagian dengan nol jika aplikasi dibuka tepat di tengah malam
+        const denominator = minutesPassed > 0 ? minutesPassed : 1;
+        return ((count / denominator) * 100).toFixed(1);
+    };
+
+    const filterItemsByRole = (items: any[], allowedRoles: string[]) => {
+        if (allowedRoles.includes(userRole)) {
+            return items;
+        }
+        return [];
+    };
+
+    const handleSortingChange = (event: any) => {
+        setSortingColumn(event.detail.sortingColumn);
+        setIsDescending(event.detail.isDescending ?? false);
+    };
+
+
+
+    const sortedDevices = React.useMemo(() => {
+        let sorted = [...data];
+        if (!sortingColumn) return sorted;
+        const field = sortingColumn.sortingField;
+        const desc = isDescending;
+        if (field === 'live_connection_uptime') {
+            sorted.sort((a, b) => {
+                const valA = Number(getLivePercent(a.today_online_count || 0));
+                const valB = Number(getLivePercent(b.today_online_count || 0));
+                return desc ? valB - valA : valA - valB;
+            });
+        }
+        else if (field === 'yesterday_online_count') {
+            sorted.sort((a, b) => {
+                const valA = a.yesterday_online_count ?? 0;
+                const valB = b.yesterday_online_count ?? 0;
+                return desc ? valB - valA : valA - valB;
+            });
+        } else if (field === 'yesterday_online_percent') {
+            sorted.sort((a, b) => {
+                const percentA = Number(getPercent(a.yesterday_online_count || 0));
+                const percentB = Number(getPercent(b.yesterday_online_count || 0));
+                return desc ? percentB - percentA : percentA - percentB;
+            });
+        } else if (field === 'yesterday_offline_count') {
+            sorted.sort((a, b) => {
+                const valA = a.yesterday_offline_count ?? 0;
+                const valB = b.yesterday_offline_count ?? 0;
+                return desc ? valB - valA : valA - valB;
+            });
+        } else if (field === 'yesterday_offline_percent') {
+            sorted.sort((a, b) => {
+                const percentA = Number(getPercent(a.yesterday_offline_count || 0));
+                const percentB = Number(getPercent(b.yesterday_offline_count || 0));
+                return desc ? percentB - percentA : percentA - percentB;
+            });
+        } else if (sortingColumn.sortingComparator) {
+            sorted.sort((a, b) => {
+                const result = sortingColumn.sortingComparator(a, b);
+                return desc ? -result : result;
+            });
+        }
+        return sorted;
+    }, [data, sortingColumn, isDescending]);
 
     useEffect(() => {
         let isMounted = true;
@@ -40,15 +113,6 @@ const Device_Report: React.FC = () => {
         return () => { isMounted = false; clearInterval(intervalId); };
     }, []);
 
-    const filtered = data.filter((device) =>
-        device.device_name?.toLowerCase().includes(filterText.toLowerCase())
-    );
-    const paginated = filtered.slice(
-        (currentPageIndex - 1) * itemsPerPage,
-        currentPageIndex * itemsPerPage
-    );
-
-    const getPercent = (count: number) => ((count / 1440) * 100).toFixed(1);
     const getOnlineColor = (percent: number) => percent < 50 ? percent < 25 ? 'red' : 'orange' : 'green';
     const getOfflineColor = () => 'red';
 
@@ -56,17 +120,31 @@ const Device_Report: React.FC = () => {
         {
             id: 'device_name',
             header: 'Device Name',
-            cell: (item: any) => item.device_name || '-'
+            cell: (item: any) => item.device_name || '-',
         },
         {
             id: 'serialnumber',
             header: 'Serial Number',
-            cell: (item: any) => item.serialnumber || '-'
+            cell: (item: any) => item.serialnumber || '-',
         },
+        ...filterItemsByRole([
+            {
+                id: 'live_connection_uptime',
+                header: 'Live Connection Uptime (%)',
+                cell: (item: any) => {
+                    const percent = Number(getLivePercent(item.today_online_count || 0));
+                    return (
+                        <span style={{ color: getOnlineColor(percent) }}>{percent}%</span>
+                    );
+                },
+                sortingField: 'live_connection_uptime',
+            },
+        ], ['Dev']),
         {
             id: 'yesterday_online_count',
             header: 'Yesterday Online Count',
-            cell: (item: any) => item.yesterday_online_count ?? '-'
+            cell: (item: any) => item.yesterday_online_count ?? '-',
+            sortingField: 'yesterday_online_count',
         },
         {
             id: 'yesterday_online_percent',
@@ -76,12 +154,14 @@ const Device_Report: React.FC = () => {
                 return (
                     <span style={{ color: getOnlineColor(percent) }}>{percent}%</span>
                 );
-            }
+            },
+            sortingField: 'yesterday_online_percent',
         },
         {
             id: 'yesterday_offline_count',
             header: 'Yesterday Offline Count',
-            cell: (item: any) => item.yesterday_offline_count ?? '-'
+            cell: (item: any) => item.yesterday_offline_count ?? '-',
+            sortingField: 'yesterday_offline_count',
         },
         {
             id: 'yesterday_offline_percent',
@@ -91,9 +171,35 @@ const Device_Report: React.FC = () => {
                 return (
                     <span style={{ color: getOfflineColor() }}>{percent}%</span>
                 );
-            }
+            },
+            sortingField: 'yesterday_offline_percent',
         },
     ];
+
+    // Sorting logic
+    let sorted = [...sortedDevices];
+    if (sortingColumn) {
+        if (sortingColumn.sortingField) {
+            sorted.sort((a, b) => {
+                const valA = a[sortingColumn.sortingField] ?? 0;
+                const valB = b[sortingColumn.sortingField] ?? 0;
+                return isDescending ? valB - valA : valA - valB;
+            });
+        } else if (sortingColumn.sortingComparator) {
+            sorted.sort((a, b) => {
+                const result = sortingColumn.sortingComparator(a, b);
+                return isDescending ? -result : result;
+            });
+        }
+    }
+
+    const filtered = sorted.filter((device) =>
+        device.device_name?.toLowerCase().includes(filterText.toLowerCase())
+    );
+    const paginated = filtered.slice(
+        (currentPageIndex - 1) * itemsPerPage,
+        currentPageIndex * itemsPerPage
+    );
 
     return (
         <div style={{ padding: '20px', borderRadius: '8px' }}>
@@ -131,6 +237,13 @@ const Device_Report: React.FC = () => {
                         onChange={({ detail }) => setCurrentPageIndex(detail.currentPageIndex)}
                     />
                 }
+                sortingColumn={sortingColumn}
+                sortingDescending={isDescending}
+                onSortingChange={handleSortingChange}
+            // onSortingChange={({ detail }) => {
+            //     setSortingColumn(detail.sortingColumn);
+            //     setIsDescending(detail.isDescending ?? false);
+            // }}
             />
         </div>
     );
