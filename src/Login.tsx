@@ -10,6 +10,46 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
   const [password, setPasswordLogin] = useState('');
   const [attempts, setAttempts] = useState(0); // Track failed login attempts
   const [errorMessage, setErrorMessage] = useState<React.ReactNode>(''); // Store error message
+  // Fungsi untuk mendeteksi device type
+  function getDeviceType() {
+    const ua = navigator.userAgent;
+    if (/tablet|ipad|playbook|silk|android(?!.*mobi)/i.test(ua)) return 'Tablet';
+    if (/Mobile|iPhone|Android|BlackBerry|IEMobile|Silk/i.test(ua)) return 'Mobile Phone';
+    return 'PC';
+  }
+
+  // Fungsi untuk mendeteksi browser
+  function getBrowser() {
+    const ua = navigator.userAgent;
+    if (ua.indexOf('Firefox') > -1) return 'Firefox';
+    if (ua.indexOf('Edg') > -1) return 'Edge';
+    if (ua.indexOf('Chrome') > -1) return 'Chrome';
+    if (ua.indexOf('Safari') > -1) return 'Safari';
+    if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) return 'Opera';
+    return 'Unknown';
+  }
+
+  // Fungsi async untuk mengambil IP publik dan lokasi
+  async function getClientInfo() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      return {
+        device_type: getDeviceType(),
+        browser: getBrowser(),
+        public_ip: data.ip,
+        location: data.city + ', ' + data.country_name
+      };
+    } catch (e) {
+      return {
+        device_type: getDeviceType(),
+        browser: getBrowser(),
+        public_ip: 'Unknown',
+        location: 'Unknown'
+      };
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (username === '' || password === '') {
@@ -20,9 +60,16 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
       );
       return;
     }
+    // Ambil info client
+    const clientInfo = await getClientInfo();
+    console.log('Client Info:', clientInfo);
     const JSON_MESSAGE = JSON.stringify({
       username: username,
       password: password,
+      device_type: clientInfo.device_type,
+      browser: clientInfo.browser,
+      public_ip: clientInfo.public_ip,
+      location: clientInfo.location,
     });
 
     try {

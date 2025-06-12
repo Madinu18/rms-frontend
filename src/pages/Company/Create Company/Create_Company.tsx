@@ -23,6 +23,13 @@ const Create_Company: React.FC = () => {
 
     const [deviceData, setDeviceData] = useState([]);
 
+    const filterItemsByGroup = (items: any[], allowedGroups: string[]) => {
+        if (allowedGroups.includes(companyGroup || '')) {
+            return items;
+        }
+        return [];
+    };
+
     const successMessage = {
         type: "success" as "success" | "error" | "warning" | "info",
         content: "Company created successfully.",
@@ -52,8 +59,20 @@ const Create_Company: React.FC = () => {
         company_contact: '',
         company_group: '',
         company_person_in_charge: '',
-        company_username: ''
+        company_account_name: '',
+        company_username: '',
+        company_password: '',
     });
+
+    const [errors, setErrors] = useState({
+        company_name: false,
+        company_address: false,
+        company_contact: false,
+        company_group: false,
+        company_person_in_charge: false
+    });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -111,9 +130,28 @@ const Create_Company: React.FC = () => {
             ...prev,
             [field]: value
         }));
+        setErrors(prev => ({
+            ...prev,
+            [field]: !value // jika kosong, error true
+        }));
     };
 
     const handleSubmit = async () => {
+        // Validasi required fields
+        const newErrors = {
+            company_name: !formData.company_name,
+            company_address: !formData.company_address,
+            company_contact: !formData.company_contact,
+            company_group: !formData.company_group,
+            company_person_in_charge: !formData.company_person_in_charge
+        };
+        setErrors(newErrors);
+        if (Object.values(newErrors).some(Boolean)) {
+            setErrorModalMessage('Please fill in all required fields.');
+            setIsErrorModalVisible(true);
+            return;
+        }
+
         addFlashbarItem(loadingMessage);
         const accessibleDevices = selectedOptions
             .map(option => option.value)
@@ -124,9 +162,12 @@ const Create_Company: React.FC = () => {
             company_contact: formData.company_contact,
             company_group: formData.company_group,
             company_person_in_charge: formData.company_person_in_charge,
+            company_account_name: formData.company_account_name,
             company_username: formData.company_username,
+            company_password: formData.company_password,
             accessible_device: accessibleDevices,
-            created_by: idUser
+            created_by: idUser,
+            id_role: idRoleUser
         });
 
         try {
@@ -147,7 +188,9 @@ const Create_Company: React.FC = () => {
                     company_contact: '',
                     company_group: '',
                     company_person_in_charge: '',
-                    company_username: ''
+                    company_account_name: '',
+                    company_username: '',
+                    company_password: ''
                 });
                 setSelectedOptions([]);
                 navigate('/company');
@@ -193,13 +236,12 @@ const Create_Company: React.FC = () => {
                     <Header>Create Company</Header>
                 </div>
 
-
-
                 <FormField label="Company Name">
                     <Input
                         value={formData.company_name}
                         onChange={e => handleInputChange('company_name', e.detail.value)}
                         placeholder="Enter company name"
+                        invalid={errors.company_name}
                     />
                 </FormField>
 
@@ -208,6 +250,7 @@ const Create_Company: React.FC = () => {
                         value={formData.company_address}
                         onChange={e => handleInputChange('company_address', e.detail.value)}
                         placeholder="Enter company address"
+                        invalid={errors.company_address}
                     />
                 </FormField>
 
@@ -216,6 +259,7 @@ const Create_Company: React.FC = () => {
                         value={formData.company_contact}
                         onChange={e => handleInputChange('company_contact', e.detail.value)}
                         placeholder="Enter company contact"
+                        invalid={errors.company_contact}
                     />
                 </FormField>
 
@@ -234,6 +278,7 @@ const Create_Company: React.FC = () => {
                             ] : companyGroup === "Reseller" ? [{ label: 'Customer', value: 'Customer' }] : []
                         }
                         placeholder="Select group"
+                        invalid={errors.company_group}
                     />
                 </FormField>
 
@@ -242,16 +287,47 @@ const Create_Company: React.FC = () => {
                         value={formData.company_person_in_charge}
                         onChange={e => handleInputChange('company_person_in_charge', e.detail.value)}
                         placeholder="Enter person in charge"
+                        invalid={errors.company_person_in_charge}
                     />
                 </FormField>
 
-                <FormField label="Username for Company Account">
-                    <Input
-                        value={formData.company_username}
-                        onChange={e => handleInputChange('company_username', e.detail.value)}
-                        placeholder="Enter username for company account"
-                    />
-                </FormField>
+                {filterItemsByGroup([
+                    <FormField key="account_name" label="Company Account Name">
+                        <Input
+                            value={formData.company_account_name}
+                            onChange={e => handleInputChange('company_account_name', e.detail.value)}
+                            placeholder="Enter account name"
+                        />
+                    </FormField>,
+
+                    <FormField key="username" label="Company Username">
+                        <Input
+                            value={formData.company_username}
+                            onChange={e => handleInputChange('company_username', e.detail.value)}
+                            placeholder="Enter username for company account"
+                        />
+                    </FormField>,
+
+                    <FormField key="password" label="Company Password">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                                <Input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={formData.company_password}
+                                    onChange={e => handleInputChange('company_password', e.detail.value)}
+                                    placeholder="Enter password for company account"
+                                />
+                            </div>
+                            <Button
+                                variant="inline-link"
+                                onClick={() => setShowPassword(prev => !prev)}
+                            >
+                                {showPassword ? 'Hide' : 'Show'}
+                            </Button>
+                        </div>
+                    </FormField>
+                ], ['Owner'])}
+
 
                 {/* Multiselect Form Field */}
                 <FormField label="Device">

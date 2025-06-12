@@ -11,6 +11,8 @@ const Device_List: React.FC<{}> = ({ }) => {
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
     const [filterText, setFilterText] = useState(''); // State untuk teks filter
     const [loading, setLoading] = useState(true);
+    const [sortingColumn, setSortingColumn] = useState<any>(null);
+    const [isDescending, setIsDescending] = useState(false);
     const itemsPerPage = 18;
 
     const id_user = localStorage.getItem('id_user');
@@ -56,22 +58,41 @@ const Device_List: React.FC<{}> = ({ }) => {
         };
     }, []);
 
-    const sortedDevices = [...dataDevice].sort((a, b) => {
-        const nameA = a.devicename.toLowerCase();
-        const nameB = b.devicename.toLowerCase();
-        if (nameA < nameB) {
-            return -1;
+    // Sorting logic
+    const getSortedDevices = () => {
+        let devices = [...dataDevice];
+        if (sortingColumn && sortingColumn.sortingField) {
+            devices.sort((a, b) => {
+                const field = sortingColumn.sortingField;
+                const aValue = a[field];
+                const bValue = b[field];
+                if (aValue === undefined || aValue === null) return 1;
+                if (bValue === undefined || bValue === null) return -1;
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    return isDescending ? bValue - aValue : aValue - bValue;
+                }
+                return isDescending
+                    ? String(bValue).localeCompare(String(aValue))
+                    : String(aValue).localeCompare(String(bValue));
+            });
+        } else {
+            // Default sort by devicename
+            devices.sort((a, b) => {
+                const nameA = a.devicename?.toLowerCase() || '';
+                const nameB = b.devicename?.toLowerCase() || '';
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            });
         }
-        if (nameA > nameB) {
-            return 1;
-        }
+        return devices;
+    };
 
-        return 0;
-    });
+    const sortedDevices = getSortedDevices();
 
     // Filter data berdasarkan teks filter
     const filteredDevices = sortedDevices.filter((device) =>
-        device.devicename.toLowerCase().includes(filterText.toLowerCase())
+        device.devicename?.toLowerCase().includes(filterText.toLowerCase())
     );
 
     const paginatedDevices = filteredDevices.slice(
@@ -90,6 +111,78 @@ const Device_List: React.FC<{}> = ({ }) => {
             header: "Serial Number",
             cell: (item: { serialnumber: any; }) => item.serialnumber || "-"
         },
+        ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
+            {
+                id: "kernel_version",
+                header: "Kernel Version",
+                sortingField: "kernel_version",
+                cell: (item: { kernel_version: any; }) => item.kernel_version || "-"
+            }
+        ] : []),
+        ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
+            {
+                id: "pss_version",
+                header: "PSS Version",
+                sortingField: "pss_version",
+                cell: (item: { pss_version: any; }) => item.pss_version || "-"
+            }
+        ] : []),
+        ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
+            {
+                id: "program_name",
+                header: "Program Name",
+                sortingField: "program_name",
+                cell: (item: { program_name: any; }) => item.program_name || "-"
+            }
+        ] : []),
+        ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
+            {
+                id: "program_version",
+                header: "Program Version",
+                sortingField: "program_version",
+                cell: (item: { program_version: any; }) => item.program_version || "-"
+            }
+        ] : []),
+
+        ...(companyGroup === 'Owner' || companyGroup === 'Reseller' ? [
+            {
+                id: "storage",
+                header: "Device Storage",
+                sortingField: "used_space",
+                cell: (item: { used_space?: number; free_space?: number }) => {
+                    const used = Number(item.used_space ?? 0);
+                    const free = Number(item.free_space ?? 0);
+                    const total = used + free;
+                    const percent = total > 0 ? Math.round((used / total) * 100) : 0;
+                    if (!total) return '-';
+                    return (
+                        <div className="storage-bar-container" style={{ position: 'relative' }}>
+                            <span className="storage-bar-label" style={{
+                                color: '#000',
+                                width: '100%',
+                                display: 'block',
+                                textAlign: 'center',
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                height: '100%',
+                                lineHeight: '22px',
+                                zIndex: 2,
+                                pointerEvents: 'none',
+                                fontSize: '11px',
+                            }}>
+                                {`${used.toFixed(1)} GB / ${total.toFixed(1)} GB (${percent}%)`}
+                            </span>
+                            <div
+                                className="storage-bar"
+                                style={{ width: `${percent}%`, backgroundColor: percent > 80 ? '#e74c3c' : percent > 60 ? '#f1c40f' : '#2ecc71', position: 'absolute', left: 0, top: 0, height: '100%', zIndex: 1 }}
+                            >
+                            </div>
+                        </div>
+                    );
+                }
+            }
+        ] : []),
         ...(companyGroup === 'Owner' ? [
             {
                 id: "reseller_name",
@@ -139,6 +232,12 @@ const Device_List: React.FC<{}> = ({ }) => {
                 }
                 columnDefinitions={columnDefinitions}
                 enableKeyboardNavigation
+                sortingColumn={sortingColumn}
+                sortingDescending={isDescending}
+                onSortingChange={({ detail }) => {
+                    setSortingColumn(detail.sortingColumn);
+                    setIsDescending(!!detail.isDescending);
+                }}
                 items={paginatedDevices}
                 loading={loading}
                 loadingText="Loading resources"

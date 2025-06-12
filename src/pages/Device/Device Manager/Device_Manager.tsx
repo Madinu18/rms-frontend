@@ -308,7 +308,7 @@ const Device_Manager: React.FC<{}> = () => {
                     }
                     header={
                         <Header>
-                            Device Manager
+                            User Device Manager
                         </Header>
                     }
                     selectionType="multi"

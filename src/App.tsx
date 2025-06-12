@@ -17,6 +17,7 @@ import UserList from "./pages/User/User List/User_List";
 import CreateUser from "./pages/User/Create User/Create_User";
 import DeviceManager from "./pages/Device/Device Manager/Device_Manager";
 import LogHistory from "./pages/Log History/Log_History";
+import LogHistoryLogin from "./pages/Log History Login/Log_History_Login";
 import NodeDevice from "./pages/NodeDevice/NodeDevice";
 
 import ProtectedRoute from "./props/ProtectedRouteProps";
@@ -108,6 +109,12 @@ const App: React.FC<AppProps> = ({ signOut }) => {
             <Route path="/log-history" element={
               <ProtectedRoute role={userRole} allowedRoles={[ROLE_DEVELOPER, ROLE_SUPER_ADMIN]}>
                 <LogHistory />
+              </ProtectedRoute>
+            }
+            />
+            <Route path="/login-log-history" element={
+              <ProtectedRoute role={userRole} allowedRoles={[ROLE_DEVELOPER, ROLE_SUPER_ADMIN]}>
+                <LogHistoryLogin />
               </ProtectedRoute>
             }
             />

@@ -12,15 +12,22 @@ const Device_Report: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
     const [filterText, setFilterText] = useState('');
-    const [sortingColumn, setSortingColumn] = useState<any>(null);
-    const [isDescending, setIsDescending] = useState(false);
+    // Tentukan default sorting berdasarkan role
+    const userRole = localStorage.getItem('role_name') || 'Guest';
+    const defaultSortingColumn = (userRole === 'Dev')
+        ? { sortingField: 'live_connection_uptime' }
+        : { sortingField: 'yesterday_online_percent' };
+    const [sortingColumn, setSortingColumn] = useState<any>(defaultSortingColumn);
+    const [isDescending, setIsDescending] = useState(true);
     const itemsPerPage = 18;
 
-    const userRole = localStorage.getItem('role_name') || 'Guest';
+    // Pindahkan ke atas sebelum getLivePercent
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    const getPercent = (count: number) => ((count / 1440) * 100).toFixed(1);
+    const getPercent = (count: number) => ((count / (1440 - 1)) * 100).toFixed(1);
     const getLivePercent = (count: number) => {
-        const now = new Date();
+        // gunakan currentTime, bukan new Date()
+        const now = currentTime;
         const minutesPassed = now.getHours() * 60 + now.getMinutes();
         // Hindari pembagian dengan nol jika aplikasi dibuka tepat di tengah malam
         const denominator = minutesPassed > 0 ? minutesPassed : 1;
@@ -111,6 +118,14 @@ const Device_Report: React.FC = () => {
         fetchData();
         const intervalId = setInterval(fetchData, 10000);
         return () => { isMounted = false; clearInterval(intervalId); };
+    }, []);
+
+    // Update currentTime setiap menit
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60 * 1000); // setiap 1 menit
+        return () => clearInterval(interval);
     }, []);
 
     const getOnlineColor = (percent: number) => percent < 50 ? percent < 25 ? 'red' : 'orange' : 'green';

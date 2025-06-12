@@ -69,42 +69,64 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible, onToggleSidebar }) => {
 
                 ], ['Owner', 'Reseller']),]
             },
-            {
-              type: "section",
-              text: "User",
-              items: [
+            ...filterItemsByGroup(
+              [
                 {
-                  type: "link",
-                  text: "List User",
-                  href: "/user",
-                },
+                  type: "section",
+                  text: "User",
+                  items: [
+                    {
+                      type: "link",
+                      text: "List User",
+                      href: "/user",
+                    },
 
-                {
-                  type: "link",
-                  text: "Create User",
-                  href: "/user/create",
-                },
+                    {
+                      type: "link",
+                      text: "Create User",
+                      href: "/user/create",
+                    },
 
-              ],
-            },
-            {
-              type: "section",
-              text: "Device",
-              items: [
-                {
-                  type: "link",
-                  text: "Device Manager",
-                  href: "/device-manager",
+                    {
+                      type: "link",
+                      text: "User Device Manager",
+                      href: "/device-manager",
+                    },
+                  ],
                 },
+                // {
+                //   type: "section",
+                //   text: "Device",
+                //   items: [
+                //     {
+                //       type: "link",
+                //       text: "Device Manager",
+                //       href: "/device-manager",
+                //     },
+                //   ],
+                // }
               ],
-            },
+              ['Owner']
+            ),
             ...filterItemsByRole(
               [
                 {
-                  type: "link",
-                  text: "Log History",
-                  href: "/log-history",
+                  type: "section",
+                  text: "Log",
+                  items: [
+                    {
+                      type: "link",
+                      text: "Log Remote History",
+                      href: "/log-history",
+                    },
+                    {
+                      type: "link",
+                      text: "Login History",
+                      href: "/login-log-history",
+                    },
+                  ],
                 },
+
               ],
               ['Dev', 'Super Admin'] // Hanya Admin & SuperAdmin yang bisa mengakses
             ),

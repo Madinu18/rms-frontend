@@ -1396,6 +1396,15 @@ const Dashboard: React.FC<{}> = () => {
                 }
             });
         }
+        if (sortingColumn && sortingColumn.sortingField === 'ping_latency') {
+            sorted.sort((a, b) => {
+                if (sortingDescending) {
+                    return b.ping_latency - a.ping_latency;
+                } else {
+                    return a.ping_latency - b.ping_latency;
+                }
+            });
+        }
         if (sortingColumn && sortingColumn.sortingField === 'tenant') {
             sorted.sort((a, b) => {
                 const aTenant = a.tenant || '';
@@ -1492,17 +1501,28 @@ const Dashboard: React.FC<{}> = () => {
             id: "status",
             header: "Status",
             sortingField: "status",
-            cell: (item: { status: number; }) => (
+            cell: (item: { status: number; pss_version: string; ping_latency: number; success_ping_rate: number; }) => (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span
-                        style={{
-                            width: '10px',
-                            height: '10px',
-                            borderRadius: '50%',
-                            backgroundColor: item.status === 1 ? 'green' : 'red',
-                            marginRight: '5px'
-                        }}
-                    ></span>
+                    {item.pss_version && item.pss_version.startsWith('2') ?
+                        <span
+                            style={{
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                backgroundColor: item.status === 1 ? item.ping_latency < 100 ? 'green' : item.ping_latency >= 100 ? 'orange' : 'red' : 'red',
+                                marginRight: '5px'
+                            }}
+                        ></span> :
+                        <span
+                            style={{
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                backgroundColor: item.status === 1 ? 'green' : 'red',
+                                marginRight: '5px'
+                            }}
+                        ></span>}
+
                 </div>
             ),
         },
@@ -1525,6 +1545,24 @@ const Dashboard: React.FC<{}> = () => {
                 cell: (item: { serialnumber: any; }) => item.serialnumber || "-"
             },
         ] : []),
+        {
+            id: "ping_latency",
+            header: "Ping Latency",
+            sortingField: "ping_latency",
+            cell: (item: { ping_latency: any; }) => {
+                const ping = Math.round(Number(item.ping_latency));
+                if (!ping || ping === 0) return "-";
+                let color = "#4caf50"; // hijau
+                if (ping > 200) color = "#f44336"; // merah
+                else if (ping > 100) color = "#ff9800"; // orange
+                return (
+                    <span style={{ color, fontWeight: 600 }}>
+                        {ping} ms
+                    </span>
+                );
+            },
+        },
+
         // {
         //     id: "device_type",
         //     header: "Device Type",

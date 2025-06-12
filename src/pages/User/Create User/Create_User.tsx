@@ -1,4 +1,4 @@
-import { FormField, Input, Header, Button, Multiselect, Modal, Box } from '@cloudscape-design/components';
+import { FormField, Input, Header, Button, Multiselect, Modal, Box, Select } from '@cloudscape-design/components';
 import './Create_User.css';
 import { useState, useEffect } from 'react';
 import Breadcrumb from '../../../components/Breadcrumb/Breadcrumb';
@@ -7,15 +7,25 @@ import { useFlashbar } from '../../../context/FlashbarContext';
 import { SharedFlashbar } from '../../../components/Flashbar/Flashbar';
 
 const ROLE_USER = import.meta.env.VITE_ROLE_USER;
+const ROLE_SUPER_ADMIN = import.meta.env.VITE_ROLE_SUPER_ADMIN;
+const ROLE_DEVELOPER = import.meta.env.VITE_ROLE_DEVELOPER;
+const ROLE_USER_MANAGER = import.meta.env.VITE_ROLE_USER_MANAGER;
 
+const roleOptions = [
+    { label: 'Super Admin', value: ROLE_SUPER_ADMIN },
+    { label: 'Developer', value: ROLE_DEVELOPER },
+    { label: 'User Manager', value: ROLE_USER_MANAGER },
+    { label: 'User', value: ROLE_USER },
+];
 
 const Create_User: React.FC = () => {
 
     const idRoleUser = localStorage.getItem('id_role');
     const idUser = localStorage.getItem('id_user');
-    const idCompany = localStorage.getItem('id_company');
+    // const idCompany = localStorage.getItem('id_company');
 
     const [deviceData, setDeviceData] = useState([]);
+    const [companyOptions, setCompanyOptions] = useState<Array<{ label: string; value: string }>>([]);
 
     const navigate = useNavigate();
 
@@ -52,13 +62,15 @@ const Create_User: React.FC = () => {
         password: '',
         confirmation_password: '',
         name: '',
-        id_company: '',
+        company_name: '',
         accessible_device: ''
     });
 
     const [selectedOptions, setSelectedOptions] = useState<Array<{
         label: string; value: string; description?: string
     }>>([]);
+
+    const [selectedRole, setSelectedRole] = useState<string>(ROLE_USER);
 
     const fetchData = async () => {
         try {
@@ -91,8 +103,37 @@ const Create_User: React.FC = () => {
         }
     };
 
+    // Fetch company list for dropdown
+    const fetchCompanyList = async () => {
+        try {
+            const response = await fetch('https://monitoring.qimtronics.com:3001/company', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    id_role: idRoleUser,
+                    created_by: idUser
+                })
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const json = await response.json();
+            const options = json.data.map((company: any) => ({
+                label: company.company_name,
+                value: company.company_name
+            }));
+            setCompanyOptions(options);
+        } catch (error) {
+            console.error('Error fetching company list:', error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchCompanyList();
     }, []);
 
     const handleInputChange = (field: string, value: string | undefined) => {
@@ -112,11 +153,12 @@ const Create_User: React.FC = () => {
             .map(option => option.value)
             .join(',');
         const JSON_MESSAGE = JSON.stringify({
-            id_company: idCompany,
+            // id_company: idCompany,
+            company_name: formData.company_name,
             username: formData.username,
             password: formData.password,
             name: formData.name,
-            id_role: ROLE_USER,
+            id_role: selectedRole,
             accessible_device: accessibleDevices
         });
         console.log(JSON_MESSAGE);
@@ -138,7 +180,7 @@ const Create_User: React.FC = () => {
                     password: '',
                     confirmation_password: '',
                     name: '',
-                    id_company: '',
+                    company_name: '',
                     accessible_device: ''
                 });
                 setSelectedOptions([]);
@@ -176,18 +218,27 @@ const Create_User: React.FC = () => {
                 />
             </div>
 
-            <div style={{ padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+            <div style={{ padding: '20px', borderRadius: '8px' }}>
                 <div style={{ marginBottom: '20px' }}>
                     <Header>Create User</Header>
                 </div>
 
                 {/* <SpaceBetween size="l"> */}
 
+                <FormField label="Company Name">
+                    <Select
+                        selectedOption={companyOptions.find(option => option.value === formData.company_name) || null}
+                        onChange={({ detail }) => handleInputChange('company_name', detail.selectedOption?.value)}
+                        options={companyOptions}
+                        placeholder="Select company name"
+                    />
+                </FormField>
+
                 <FormField label="Username">
                     <Input
                         value={formData.username}
                         onChange={e => handleInputChange('username', e.detail.value)}
-                        placeholder="Enter company name"
+                        placeholder="Enter username"
                     />
                 </FormField>
 
@@ -195,7 +246,7 @@ const Create_User: React.FC = () => {
                     <Input
                         value={formData.password}
                         onChange={e => handleInputChange('password', e.detail.value)}
-                        placeholder="Enter company address"
+                        placeholder="Enter user password"
                         type="password"
                     />
                 </FormField>
@@ -204,16 +255,25 @@ const Create_User: React.FC = () => {
                     <Input
                         value={formData.confirmation_password}
                         onChange={e => handleInputChange('confirmation_password', e.detail.value)}
-                        placeholder="Enter company address"
+                        placeholder="Enter again user password"
                         type="password"
                     />
                 </FormField>
 
-                <FormField label="Name">
+                <FormField label="Account Name">
                     <Input
                         value={formData.name}
                         onChange={e => handleInputChange('name', e.detail.value)}
-                        placeholder="Enter company contact"
+                        placeholder="Enter account name"
+                    />
+                </FormField>
+
+                <FormField label="Role">
+                    <Select
+                        selectedOption={roleOptions.find(option => option.value === selectedRole) || null}
+                        onChange={({ detail }) => setSelectedRole(detail.selectedOption?.value || ROLE_USER)}
+                        options={roleOptions}
+                        placeholder="Select role"
                     />
                 </FormField>
 

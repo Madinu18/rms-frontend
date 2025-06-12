@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Header, Table, Box, SpaceBetween, TextFilter, Button, Modal, FormField, Input, Select } from '@cloudscape-design/components';
+import { Header, Table, Box, SpaceBetween, TextFilter, Button, Modal, FormField, Input } from '@cloudscape-design/components';
 import { Link } from 'react-router-dom';
 import './Company_List.css';
 import { useEffect, useState } from 'react';
@@ -324,7 +324,7 @@ const List_Company: React.FC<{}> = () => {
                             />
                         </FormField>
 
-                        <FormField label="Group">
+                        {/* <FormField label="Group">
                             <Select
                                 selectedOption={editingItem?.group_name ? { label: editingItem?.group_name, value: editingItem?.group_name } : null}
                                 onChange={e => handleInputChange('group_name', e.detail.selectedOption.value || '')}
@@ -335,7 +335,7 @@ const List_Company: React.FC<{}> = () => {
                                 ]}
                                 placeholder="Select group"
                             />
-                        </FormField>
+                        </FormField> */}
 
                         <FormField label="Person in Charge">
                             <Input

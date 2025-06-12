@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-empty-pattern */
 import { Header, Table, Box, SpaceBetween, TextFilter, Pagination } from '@cloudscape-design/components';
-import './Log_History.css';
+import './Log_History_Login.css';
 import { useEffect, useState } from 'react';
 import { parse, addHours as addHoursToDate, format } from 'date-fns';
 
@@ -18,7 +18,7 @@ const parseDate = (str: string): Date => {
     return new Date(`${year}-${month}-${day}T${timePart}`);
 };
 
-const Log_History: React.FC<{}> = ({ }) => {
+const Log_History_Login: React.FC<{}> = ({ }) => {
     const [loading, setLoading] = useState(true);
 
     const [dataLog, setDataLog] = useState<any[]>([]);
@@ -32,7 +32,7 @@ const Log_History: React.FC<{}> = ({ }) => {
 
         const fetchData = async () => {
             try {
-                const response = await fetch('https://monitoring.qimtronics.com:3001/log-history', {
+                const response = await fetch('https://monitoring.qimtronics.com:3001/login-log-history', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ const Log_History: React.FC<{}> = ({ }) => {
     // Logika filtering berdasarkan Device Name
     useEffect(() => {
         const filtered = dataLog.filter(item =>
-            item.devicename?.toLowerCase().includes(filteringText.toLowerCase())
+            item.username?.toLowerCase().includes(filteringText.toLowerCase())
         );
         setFilteredDataLog(filtered);
         setCurrentPageIndex(1); // Reset ke halaman pertama saat filter berubah
@@ -100,34 +100,29 @@ const Log_History: React.FC<{}> = ({ }) => {
                         cell: item => item.timestamp ? addHours(item.timestamp, 7) : "-",
                     },
                     {
-                        id: "name",
-                        header: "Name",
-                        cell: item => item.name || "-"
+                        id: "username",
+                        header: "Username",
+                        cell: item => item.username || "-"
                     },
                     {
-                        id: "company",
-                        header: "Company",
-                        cell: item => item.company || "-"
+                        id: "device_type",
+                        header: "Device Type",
+                        cell: item => item.device_type || "-"
                     },
                     {
-                        id: "role",
-                        header: "Role",
-                        cell: item => item.role || "-"
+                        id: "browser",
+                        header: "Browser",
+                        cell: item => item.browser || "-"
                     },
                     {
-                        id: "device_name",
-                        header: "Device Name",
-                        cell: item => item.devicename || "-"
+                        id: "public_ip",
+                        header: "Public IP",
+                        cell: item => item.public_ip || "-"
                     },
                     {
-                        id: "serial_number",
-                        header: "Serial Number",
-                        cell: item => item.serialnumber || "-"
-                    },
-                    {
-                        id: "activity",
-                        header: "Activity",
-                        cell: item => item.activity || "-"
+                        id: "location",
+                        header: "Location",
+                        cell: item => item.location || "-"
                     }
                 ]}
                 enableKeyboardNavigation
@@ -142,13 +137,12 @@ const Log_History: React.FC<{}> = ({ }) => {
                     >
                         <SpaceBetween size="m">
                             <b>No resources</b>
-
                         </SpaceBetween>
                     </Box>
                 }
                 filter={
                     <TextFilter
-                        filteringPlaceholder="Find by Device Name"
+                        filteringPlaceholder="Find by Username"
                         filteringText={filteringText}
                         onChange={({ detail }) => {
                             setFilteringText(detail.filteringText);
@@ -157,7 +151,7 @@ const Log_History: React.FC<{}> = ({ }) => {
                     />
                 }
                 header={
-                    <Header>Remote History</Header>
+                    <Header>Login History</Header>
                 }
                 pagination={
                     <Pagination
@@ -171,4 +165,4 @@ const Log_History: React.FC<{}> = ({ }) => {
     );
 };
 
-export default Log_History;
+export default Log_History_Login;
